@@ -1,12 +1,14 @@
 package kakaotech.communityBE.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "users")
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = "password")
 public class User {
 
     @Id
@@ -22,6 +24,6 @@ public class User {
     @Column(unique = true, nullable = false, length = 10)
     private String nickname;
 
-    @Column
+    @Column @Lob
     private String profileImage;
 }
