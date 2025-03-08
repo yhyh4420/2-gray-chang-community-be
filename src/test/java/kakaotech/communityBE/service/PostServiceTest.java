@@ -1,5 +1,6 @@
 package kakaotech.communityBE.service;
 
+import kakaotech.communityBE.dto.PostEditDto;
 import kakaotech.communityBE.dto.PostsDto;
 import kakaotech.communityBE.entity.Posts;
 import kakaotech.communityBE.entity.User;
@@ -84,7 +85,7 @@ class PostServiceTest {
     void testGetAllPost() {
         when(postRepository.findAll()).thenReturn(Arrays.asList(post1, post2));
 
-        List<PostsDto> result = postService.getPosts(1L);
+        List<PostsDto> result = postService.getPosts();
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getTitle()).isEqualTo("Test Title");
@@ -104,7 +105,8 @@ class PostServiceTest {
     void testEditPost() {
         when(postRepository.findById(1L)).thenReturn(Optional.of(post1));
 
-        PostsDto result = postService.editPost(1L, 1L, "Updated Title", "Updated Content", "updated.jpg");
+        PostEditDto editDto = new PostEditDto( "Updated Title", "Updated Content", "updated.jpg");
+        PostsDto result = postService.editPost(1L, 1L, editDto);
 
         assertThat(result.getTitle()).isEqualTo("Updated Title");
         assertThat(result.getContent()).isEqualTo("Updated Content");
@@ -115,7 +117,7 @@ class PostServiceTest {
     void testDeletePost() {
         when(postRepository.findById(1L)).thenReturn(Optional.of(post1));
 
-        postService.deletePost(1L);
+        postService.deletePost(1L,  1L);
 
         verify(postRepository, times(1)).delete(post1);
     }
@@ -131,13 +133,14 @@ class PostServiceTest {
 
     @Test
     void testEditPostUnauthorized() {
+        PostEditDto editDto = new PostEditDto( "Updated Title", "Updated Content", "updated.jpg");
         User anotherUser = new User();
         anotherUser.setId(2L);
         post1.setUser(anotherUser);
 
         when(postRepository.findById(1L)).thenReturn(Optional.of(post1));
 
-        assertThatThrownBy(() -> postService.editPost(1L, 1L, "Updated Title", "Updated Content", "updated.jpg"))
+        assertThatThrownBy(() -> postService.editPost(1L, 1L, editDto))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining(HttpStatus.UNAUTHORIZED.toString());
     }
