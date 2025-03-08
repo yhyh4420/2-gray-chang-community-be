@@ -6,6 +6,7 @@ import kakaotech.communityBE.dto.LoginDto;
 import kakaotech.communityBE.dto.SignupDto;
 import kakaotech.communityBE.entity.User;
 import kakaotech.communityBE.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,10 +31,10 @@ public class UserController {
         if (user == null) {
             return ResponseEntity.status(401).body("이메일이나 비밀번호가 잘못되었습니다");
         }
-        session.setAttribute("user", user);
+        session.setAttribute("userId", user.getId());
         response.put("message", "로그인 성공!");
         response.put("email", user.getEmail());
-        return ResponseEntity.status(200).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping("/logout")

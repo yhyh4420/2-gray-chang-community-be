@@ -1,14 +1,16 @@
 package kakaotech.communityBE.entity;
 
 import jakarta.persistence.*;
-import jdk.jfr.Timestamp;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "comment")
@@ -20,7 +22,7 @@ public class Comment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "postId", nullable = false)
-    private Post post;
+    private Posts posts;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", nullable = false)
@@ -31,5 +33,5 @@ public class Comment {
 
     @CreationTimestamp
     @Column(updatable = false)
-    private LocalDateTime createTime;
+    private LocalDateTime commentDate;
 }
