@@ -55,7 +55,7 @@ public class PostService {
     }
 
     @Transactional
-    public List<PostsDto> getPosts(Long userId) {
+    public List<PostsDto> getPosts() {
         List<Posts> posts = postRepository.findAll();
         List<PostsDto> postsDtos = posts.stream()
                 .map(post -> new PostsDto(post))
