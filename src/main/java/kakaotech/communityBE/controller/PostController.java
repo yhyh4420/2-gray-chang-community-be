@@ -1,9 +1,12 @@
 package kakaotech.communityBE.controller;
 
 import jakarta.servlet.http.HttpSession;
+import kakaotech.communityBE.dto.CommentDto;
 import kakaotech.communityBE.dto.PostUpdateDto;
 import kakaotech.communityBE.dto.PostsDto;
+import kakaotech.communityBE.service.CommentService;
 import kakaotech.communityBE.service.PostService;
+import kakaotech.communityBE.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +21,11 @@ import java.util.Map;
 public class PostController {
 
     private final PostService postService;
+    private final CommentService commentService;
 
-    public PostController(PostService postService) {
+    public PostController(PostService postService, CommentService commentService) {
         this.postService = postService;
+        this.commentService = commentService;
     }
 
     @GetMapping
@@ -30,10 +35,14 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<PostsDto> getPost(@PathVariable Long postId) {
+    public ResponseEntity<Map<String, Object>> getPost(@PathVariable Long postId) {
         PostsDto postsDto = postService.getPost(postId);
-        //todo: Comment List로 받아오는 것도 여기서 해야함(아마 메서드명 getAllComment(postId)?)
-        return ResponseEntity.status(HttpStatus.OK).body(postsDto);
+        List<CommentDto> comments = commentService.getAllComments(postId);
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "ok");
+        response.put("post", postsDto);
+        response.put("comments", comments);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping
