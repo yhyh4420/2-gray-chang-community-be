@@ -1,13 +1,12 @@
 package kakaotech.communityBE.controller;
 
 import jakarta.servlet.http.HttpSession;
-import kakaotech.communityBE.dto.PostEditDto;
+import kakaotech.communityBE.dto.PostUpdateDto;
 import kakaotech.communityBE.dto.PostsDto;
 import kakaotech.communityBE.service.PostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,16 +44,16 @@ public class PostController {
     }
 
     @PutMapping("/{postId}")
-    public ResponseEntity updatePost(@PathVariable Long postId, @RequestBody PostEditDto editDto, HttpSession session) {
+    public ResponseEntity<Map<String, Object>> updatePost(@PathVariable Long postId, @RequestBody PostUpdateDto editDto, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
-        PostsDto post = postService.editPost(userId, postId, editDto);
+        PostsDto post = postService.updatePost(userId, postId, editDto);
         Map<String, Object> response = new HashMap<>();
         response.put("message", "수정 성공!");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity deletePost(@PathVariable Long postId, HttpSession session) {
+    public ResponseEntity<Map<String, Object>> deletePost(@PathVariable Long postId, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
         postService.deletePost(userId, postId);
         Map<String, Object> response = new HashMap<>();
@@ -63,7 +62,7 @@ public class PostController {
     }
 
     @PutMapping("/{postId}/likes")
-    public ResponseEntity likePost(@PathVariable Long postId, HttpSession session) {
+    public ResponseEntity<Map<String, Object>> likePost(@PathVariable Long postId, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
         int likes = postService.increaseLikePost(userId, postId);
         Map<String, Object> response = new HashMap<>();
@@ -73,8 +72,4 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
-
-    /*
-    todo : 게시글 수정, 삭제, 좋아요
-     */
 }
