@@ -60,12 +60,12 @@ public class PostService {
         return user;
     }
 
-    @Transactional
-    public List<PostsDto> getPosts() {
+    @Transactional(readOnly = true)
+    public List<PostsDto> getAllPosts() {
         List<Posts> posts = postRepository.findAll();
         List<PostsDto> postsDtos = posts.stream()
                 .map(PostsDto::new)
-                .collect(Collectors.toList());
+                .toList();
         return postsDtos;
     }
 
@@ -102,7 +102,7 @@ public class PostService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "직성자만 게시글을 수정할 수 있습니다.");
         }
         posts.setTitle(postUpdateDto.getTitle());
-        posts.setContent(posts.getContent());
+        posts.setContent(postUpdateDto.getContent());
         posts.setImage(postUpdateDto.getImage());
         return new PostsDto(posts);
     }

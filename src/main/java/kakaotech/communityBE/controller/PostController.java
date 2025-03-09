@@ -25,7 +25,7 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<List<PostsDto>> getAllPost() {
-        List<PostsDto> postsDtoList = postService.getPosts();
+        List<PostsDto> postsDtoList = postService.getAllPosts();
         return ResponseEntity.ok(postsDtoList);
     }
 

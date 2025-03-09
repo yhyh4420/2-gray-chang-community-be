@@ -85,7 +85,7 @@ class PostServiceTest {
     void testGetAllPost() {
         when(postRepository.findAll()).thenReturn(Arrays.asList(post1, post2));
 
-        List<PostsDto> result = postService.getPosts();
+        List<PostsDto> result = postService.getAllPosts();
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getTitle()).isEqualTo("Test Title");
