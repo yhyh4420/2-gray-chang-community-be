@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter @Setter
 @AllArgsConstructor
-public class PostEditDto {
+public class PostUpdateDto {
     private String title;
     private String content;
     private String image;

@@ -1,6 +1,6 @@
 package kakaotech.communityBE.service;
 
-import kakaotech.communityBE.dto.PostEditDto;
+import kakaotech.communityBE.dto.PostUpdateDto;
 import kakaotech.communityBE.dto.PostsDto;
 import kakaotech.communityBE.entity.Posts;
 import kakaotech.communityBE.entity.User;
@@ -102,11 +102,11 @@ class PostServiceTest {
     }
 
     @Test
-    void testEditPost() {
+    void testUpdatePost() {
         when(postRepository.findById(1L)).thenReturn(Optional.of(post1));
 
-        PostEditDto editDto = new PostEditDto( "Updated Title", "Updated Content", "updated.jpg");
-        PostsDto result = postService.editPost(1L, 1L, editDto);
+        PostUpdateDto editDto = new PostUpdateDto( "Updated Title", "Updated Content", "updated.jpg");
+        PostsDto result = postService.updatePost(1L, 1L, editDto);
 
         assertThat(result.getTitle()).isEqualTo("Updated Title");
         assertThat(result.getContent()).isEqualTo("Updated Content");
@@ -132,15 +132,15 @@ class PostServiceTest {
     }
 
     @Test
-    void testEditPostUnauthorized() {
-        PostEditDto editDto = new PostEditDto( "Updated Title", "Updated Content", "updated.jpg");
+    void testUpdatePostUnauthorized() {
+        PostUpdateDto editDto = new PostUpdateDto( "Updated Title", "Updated Content", "updated.jpg");
         User anotherUser = new User();
         anotherUser.setId(2L);
         post1.setUser(anotherUser);
 
         when(postRepository.findById(1L)).thenReturn(Optional.of(post1));
 
-        assertThatThrownBy(() -> postService.editPost(1L, 1L, editDto))
+        assertThatThrownBy(() -> postService.updatePost(1L, 1L, editDto))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining(HttpStatus.UNAUTHORIZED.toString());
     }
