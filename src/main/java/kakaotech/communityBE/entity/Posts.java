@@ -13,7 +13,7 @@ import java.util.List;
 @Entity
 @Getter @Setter
 @NoArgsConstructor
-@Table(name = "post")
+@Table(name = "posts")
 public class Posts {
 
     @Id
@@ -44,7 +44,7 @@ public class Posts {
     @Column(updatable = false, nullable = false)
     private LocalDateTime postDate;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "posts", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
 }
