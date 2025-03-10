@@ -6,22 +6,27 @@ import kakaotech.communityBE.dto.PostUpdateDto;
 import kakaotech.communityBE.dto.PostsDto;
 import kakaotech.communityBE.service.CommentService;
 import kakaotech.communityBE.service.PostService;
-import kakaotech.communityBE.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/posts")
-@CrossOrigin(origins = "http://127.0.0.1:5500")
+@CrossOrigin(origins = "http://localhost:5500")
 public class PostController {
 
     private final PostService postService;
     private final CommentService commentService;
+
+    private static final String UPLOAD_DIR = "uploads/postImage/";
 
     public PostController(PostService postService, CommentService commentService) {
         this.postService = postService;
@@ -46,10 +51,36 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostsDto> createPost(@RequestBody PostsDto postsDto, HttpSession session) {
+    public ResponseEntity<PostsDto> createPost(
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
-        PostsDto post = postService.createPost(userId, postsDto.getTitle(), postsDto.getContent(), postsDto.getImage());
-        return ResponseEntity.status(HttpStatus.CREATED).body(post);
+        System.out.println("현재 세션 아이디 : " + userId);
+
+        String imagePath = null;
+        if (image != null && !image.isEmpty()) {
+            try {
+                // 이미지 저장 경로 설정
+                File uploadDir = new File(UPLOAD_DIR);
+                if (!uploadDir.exists()) {
+                    uploadDir.mkdirs(); // 폴더가 없으면 생성
+                }
+
+                // 파일 저장
+                String fileName = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
+                File destFile = new File(UPLOAD_DIR + fileName);
+                image.transferTo(destFile);
+
+                // 이미지 URL 저장
+                imagePath = "/" + UPLOAD_DIR + fileName; // 저장된 이미지 경로
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            }
+        }
+        PostsDto post = postService.createPost(userId, title, content, imagePath);
+        return ResponseEntity.ok(post);
     }
 
     @PutMapping("/{postId}")
