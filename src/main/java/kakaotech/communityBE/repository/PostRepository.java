@@ -10,13 +10,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PostRepository extends JpaRepository<Posts, Long> {
-    @Modifying
-    @Query("update Posts p set p.views = p.views+1 where p.id = :postId")
-    int increaseViews(@Param("postId") Long postId);
 
     @Modifying
     @Query("update Posts p set p.likes = p.likes+1 where p.id = :postId")
     int increaseLikes(@Param("postId") Long postId);
-
-    int getPostsById(Long id);
 }

@@ -1,6 +1,6 @@
 package kakaotech.communityBE.service;
 
-import kakaotech.communityBE.dto.PostEditDto;
+import kakaotech.communityBE.dto.PostUpdateDto;
 import kakaotech.communityBE.dto.PostsDto;
 import kakaotech.communityBE.entity.Like;
 import kakaotech.communityBE.entity.Posts;
@@ -54,18 +54,18 @@ public class PostService {
     private User getUser(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> {
-                    logger.warn("유저 없음");
+                    logger.warn("유저 없음 : {}", userId);
                     return new ResponseStatusException(HttpStatus.NOT_FOUND, "유저 정보를 찾을 수 없습니다. 로그인 정보를 확인하세요");
                 });
         return user;
     }
 
-    @Transactional
-    public List<PostsDto> getPosts() {
+    @Transactional(readOnly = true)
+    public List<PostsDto> getAllPosts() {
         List<Posts> posts = postRepository.findAll();
         List<PostsDto> postsDtos = posts.stream()
                 .map(PostsDto::new)
-                .collect(Collectors.toList());
+                .toList();
         return postsDtos;
     }
 
@@ -95,15 +95,15 @@ public class PostService {
     }
 
     @Transactional
-    public PostsDto editPost(Long postId, Long userId, PostEditDto postEditDto) {
+    public PostsDto updatePost(Long postId, Long userId, PostUpdateDto postUpdateDto) {
         Posts posts = getPostsbyId(postId);
         if (!posts.getUser().getId().equals(userId)) {
             logger.warn("작성자 아님");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "직성자만 게시글을 수정할 수 있습니다.");
         }
-        posts.setTitle(postEditDto.getTitle());
-        posts.setContent(posts.getContent());
-        posts.setImage(postEditDto.getImage());
+        posts.setTitle(postUpdateDto.getTitle());
+        posts.setContent(postUpdateDto.getContent());
+        posts.setImage(postUpdateDto.getImage());
         return new PostsDto(posts);
     }
 
