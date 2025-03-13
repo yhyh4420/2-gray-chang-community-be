@@ -19,8 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -32,6 +30,7 @@ public class UserController {
     private final UserService userService;
     private final SessionStorage sessionStorage;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/profile/";
     private static final String DEFAULT_IMAGE_PATH = "/uploads/profile/default-profile.jpg"; // 기본 프로필 이미지
 
