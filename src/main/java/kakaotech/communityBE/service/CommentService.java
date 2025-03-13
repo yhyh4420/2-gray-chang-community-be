@@ -54,24 +54,16 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentDto createComment(CommentDto commentDto) {
-        User user = getUser(commentDto.getUserId());
-        Posts post = getPost(commentDto.getPostId());
-
+    public CommentDto createComment(Long userId, Long postId, String content) {
+        User user = getUser(userId);
+        Posts post = getPost(postId);
         Comment comment = new Comment();
         comment.setUser(user);
         comment.setPosts(post);
-        comment.setComment(commentDto.getComment());
+        comment.setComment(content);
         commentRepository.save(comment);
         return new CommentDto(comment);
     }
-
-    /*
-    todo
-      1. (완료) 댓글 불러오기(전체만 불러와도 되지 않나? -> 이건 조금만 더 고민)
-      2. (완료) 댓글 수정
-      3. 댓글 삭제
-     */
 
     @Transactional(readOnly = true)
     public List<CommentDto> getAllComments(Long postId) {
@@ -92,13 +84,13 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentDto updateComment(Long userId, CommentDto commentDto) {
-        if (!commentDto.getUserId().equals(userId)) {
+    public CommentDto updateComment(Long userId, Long commentId, String content) {
+        Comment comment = getCommentbyId(commentId);
+        if (!comment.getUser().getId().equals(userId)) {
             logger.warn("작성자 아님");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "작성자만 게시글을 수정할 수 있습니다");
         }
-        Comment comment = getCommentbyId(commentDto.getId());
-        comment.setComment(commentDto.getComment());
+        comment.setComment(content);
         return new CommentDto(comment);
     }
 

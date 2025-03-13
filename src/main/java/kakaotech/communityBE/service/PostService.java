@@ -90,6 +90,7 @@ public class PostService {
         if (userId != posts.getUser().getId()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "게시글 작성자만 글을 지울 수 있습니다.");
         } else{
+            likeRepository.deleteByPost(posts);
             postRepository.delete(posts);
         }
     }
@@ -109,6 +110,7 @@ public class PostService {
 
     @Transactional
     public int increaseLikePost(Long postId, Long userId) {
+        logger.info("userId : {}, postId : {}", userId, postId);
         User user = getUser(userId);
         Posts posts = getPostsbyId(postId);
         Optional<Like> like = likeRepository.findByUserAndPost(user, posts);
