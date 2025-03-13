@@ -45,11 +45,9 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<Map<String, Object>> getPost(@PathVariable Long postId) {
         PostsDto postsDto = postService.getPost(postId);
-        List<CommentDto> comments = commentService.getAllComments(postId);
         Map<String, Object> response = new HashMap<>();
         response.put("message", "ok");
         response.put("post", postsDto);
-        response.put("comments", comments);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

@@ -5,19 +5,18 @@ import kakaotech.communityBE.entity.Comment;
 import kakaotech.communityBE.repository.SessionStorage;
 import kakaotech.communityBE.service.CommentService;
 import lombok.RequiredArgsConstructor;
-import org.h2.engine.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/comment")
+@RequestMapping("posts/{postId}/comment")
 @CrossOrigin(origins = "http://localhost:5500")
 @RequiredArgsConstructor
 public class CommentController {
@@ -26,12 +25,19 @@ public class CommentController {
     private final CommentService commentService;
     private final SessionStorage sessionStorage;
 
+    @GetMapping
+    public ResponseEntity<List<CommentDto>> getComments(@PathVariable("postId") Long postId) {
+        List<CommentDto> commentDtoList = commentService.getAllComments(postId);
+        return ResponseEntity.ok(commentDtoList);
+    }
+
     @PostMapping
     public ResponseEntity<CommentDto> createComment(
-            @RequestParam("content") String content,
-            @RequestParam("postId") Long postId,
+            @RequestBody Map<String, String> request,
+            @PathVariable("postId") Long postId,
             @CookieValue(value = "sessionId", required = false) String sessionId) {
         Long userId = (Long) sessionStorage.getUserId(sessionId);
+        String content = request.get("content");
         logger.info("userId : {}, content : {}, postId : {}", userId, content, postId);
         CommentDto comment = commentService.createComment(userId, postId, content);
         return ResponseEntity.ok(comment);
@@ -47,6 +53,19 @@ public class CommentController {
         CommentDto commentDto = commentService.updateComment(userId, commentId, content);
         Map<String, Object> response = new HashMap<>();
         response.put("message", "수정 성공!");
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+    }
+
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Map<String, Object>> deleteComment(
+            @PathVariable Long postId,
+            @PathVariable Long commentId,
+            @CookieValue(value = "sessionId", required = false) String sessionId){
+        Long userId = (Long) sessionStorage.getUserId(sessionId);
+        logger.info("userId : {}, postId : {}, commentId : {}", userId, postId, commentId);
+        commentService.deleteComment(userId, commentId);
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "삭제 완료!");
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
     }
 }
