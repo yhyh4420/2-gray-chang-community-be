@@ -1,6 +1,8 @@
 package kakaotech.communityBE.dto;
 
 import kakaotech.communityBE.entity.Posts;
+import kakaotech.communityBE.entity.User;
+import kakaotech.communityBE.repository.PostRepository;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,6 +22,10 @@ public class PostsDto {
     private LocalDateTime postDate;
     private List<CommentDto> comments;
 
+    private Long userId;
+    private String nickname;
+    private String profileImagePath;
+
     public PostsDto(Posts posts) {
         this.id = posts.getId();
         this.title = posts.getTitle();
@@ -30,6 +36,10 @@ public class PostsDto {
         this.comments = posts.getComments().stream()
                 .map(CommentDto::new)
                 .collect(Collectors.toList());
+        this.postDate = posts.getPostDate();
+        this.userId = posts.getUser().getId();
+        this.nickname = posts.getUser().getNickname();
+        this.profileImagePath = posts.getUser().getProfileImage();
     }
 
 }
