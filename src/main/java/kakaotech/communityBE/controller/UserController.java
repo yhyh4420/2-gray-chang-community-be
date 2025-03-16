@@ -196,10 +196,10 @@ public class UserController {
 
     @PutMapping("/update/password")
     public ResponseEntity<Map<String, String>> updatePassword(
-            @RequestParam("password") String password,
+            @RequestBody Map<String, String> requestBody,
             @CookieValue(value = "sessionId", required = false) String sessionId) {
         Long userId = sessionStorage.getUserId(sessionId);
-        User newUser = userService.updatePassword(userId, password);
+        User newUser = userService.updatePassword(userId, requestBody.get("password"));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Map.of("message", "수정 성공!"));
     }
 

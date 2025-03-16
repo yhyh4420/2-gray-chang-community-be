@@ -8,17 +8,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class SessionStorage {
-    private final Map<String, Object> sessionStore = new ConcurrentHashMap<>();
+    private final Map<String, Long> sessionStore = new ConcurrentHashMap<>();
 
     // 새로운 세션 생성 (로그인 시)
-    public String createSession(Object userId) {
+    public String createSession(Long userId) {
         String sessionId = UUID.randomUUID().toString(); // 고유한 세션 ID 생성
         sessionStore.put(sessionId, userId);
         return sessionId;
     }
 
     // 세션에서 사용자 ID 가져오기
-    public Object getUserId(String sessionId) {
+    public Long getUserId(String sessionId) {
         return sessionStore.get(sessionId);
     }
 
