@@ -29,9 +29,6 @@ public class UserController {
     private final UserService userService;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/profile/";
-    private static final String DEFAULT_IMAGE_PATH = "/uploads/profile/default-profile.jpg"; // 기본 프로필 이미지
-
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(
             @RequestBody LoginDto loginDto,
@@ -104,7 +101,6 @@ public class UserController {
 
         User user = userService.getUserBySession(sessionId);
 
-        // ✅ 닉네임 & 이미지 업데이트
         User updatedUser = userService.updateNickName(user.getId(), nickName, imageFile);
         logger.info("Updated User Info: Nickname - {}, ImagePath - {}", updatedUser.getNickname(), updatedUser.getProfileImage());
 
@@ -117,7 +113,7 @@ public class UserController {
             @RequestBody Map<String, String> requestBody,
             @CookieValue(value = "sessionId", required = false) String sessionId) {
         Long userId = userService.getUserBySession(sessionId).getId();
-        User newUser = userService.updatePassword(userId, requestBody.get("password"));
+        userService.updatePassword(userId, requestBody.get("password"));
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Map.of("message", "수정 성공!"));
     }
 

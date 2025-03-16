@@ -31,8 +31,6 @@ public class PostController {
     private final PostService postService;
     private final UserService userService;
 
-    private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/postImage/";
-
     @GetMapping
     public ResponseEntity<List<PostsDto>> getAllPost() {
         List<PostsDto> postsDtoList = postService.getAllPosts();
