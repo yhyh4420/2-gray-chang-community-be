@@ -26,4 +26,7 @@ public class User {
 
     @Column @Lob
     private String profileImage;
+
+    @Column(nullable = false)
+    private boolean isResigned = false;
 }

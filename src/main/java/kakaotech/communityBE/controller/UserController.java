@@ -1,13 +1,10 @@
 package kakaotech.communityBE.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import kakaotech.communityBE.dto.LoginDto;
 import kakaotech.communityBE.entity.User;
 import kakaotech.communityBE.repository.SessionStorage;
 import kakaotech.communityBE.service.UserService;
-import org.apache.coyote.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -40,12 +37,10 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody LoginDto loginDto, HttpServletResponse response) {
+    public ResponseEntity<Map<String, Object>> login(
+            @RequestBody LoginDto loginDto,
+            HttpServletResponse response) {
         User user = userService.login(loginDto.getEmail(), loginDto.getPassword());
-
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "이메일이나 비밀번호가 잘못되었습니다."));
-        }
 
         String sessionId = sessionStorage.createSession(user.getId());
         logger.info("로그인 성공 - 세션 ID: {}", sessionId);
@@ -58,7 +53,7 @@ public class UserController {
                                 .secure(true)
                                 .build();
 
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());;
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok(Map.of("message", "로그인 성공",
                 "sessionId", sessionId,
@@ -67,8 +62,9 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity logout(@CookieValue(value = "sessionId", required = false) String sessionId,
-                                 HttpServletResponse response) {
+    public ResponseEntity logout(
+            @CookieValue(value = "sessionId", required = false) String sessionId,
+            HttpServletResponse response) {
         if (sessionId != null) {
             sessionStorage.removeSession(sessionId);
             logger.info("로그아웃 - 세션 ID 제거: {}", sessionId);
@@ -79,7 +75,7 @@ public class UserController {
                 .httpOnly(true)
                 .sameSite("None")
                 .secure(true)
-                .maxAge(0) // ✅ 쿠키 즉시 만료
+                .maxAge(0)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
@@ -137,18 +133,81 @@ public class UserController {
             logger.info("유효한 세션 : {}", sessionId);
         }
 
-        Object userId = sessionStorage.getUserId(sessionId);
+        Long userId = sessionStorage.getUserId(sessionId);
         if (userId == null) {
             logger.warn("세션은 유효한데 userId 없음 : {}", userId);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "세션에 매치되는 유저아이디 없음"));
         }
         logger.info("세션 유지중 - userId : {}", userId);
-        User user = userService.findById((Long) userId);
+        User user = userService.findById(userId);
         return ResponseEntity.ok(Map.of(
                 "message", "ok",
                 "userId", userId,
                 "sessionId", sessionId,
                 "nickname", user.getNickname(),
+                "email", user.getEmail(),
                 "profileImage", user.getProfileImage()));
+    }
+
+    @PutMapping("/update/nickname")
+    public ResponseEntity<Map<String, String>> updateProfile(
+            @RequestParam("nickName") String nickName,
+            @RequestParam(value = "image", required = false) MultipartFile imageFile,
+            @CookieValue(value = "sessionId", required = false) String sessionId) {
+
+        Long userId = sessionStorage.getUserId(sessionId);
+        User user = userService.findById(userId);
+        String oldImagePath = user.getProfileImage();
+
+        logger.info("UserId: {}, OldImagePath: {}, NewNickname: {}", userId, oldImagePath, nickName);
+
+        // ✅ 기존 이미지 삭제 (이전 이미지가 기본 이미지가 아닐 때만 삭제)
+        if (oldImagePath != null && !oldImagePath.equals(DEFAULT_IMAGE_PATH)) {
+            File oldFile = new File(oldImagePath.substring(1)); // 앞에 '/' 제거
+            if (oldFile.exists()) {
+                boolean deleted = oldFile.delete();
+                logger.info("Old Image Deleted: {}", deleted);
+            }
+        }
+
+        String imagePath = DEFAULT_IMAGE_PATH; // 기본 프로필 이미지 경로
+
+        // ✅ 새로운 이미지 저장
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
+                File destFile = new File(UPLOAD_DIR + fileName);
+                imageFile.transferTo(destFile);
+                imagePath = "/uploads/profile/" + fileName; // 클라이언트에서 접근할 수 있도록 경로 설정
+                logger.info("New Profile Image Saved: {}", imagePath);
+            } catch (IOException e) {
+                logger.error("새 프로필 이미지 저장 에러 : {}", e.getMessage());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "이미지 저장 실패"));
+            }
+        }
+
+        // ✅ 닉네임 & 이미지 업데이트
+        User updatedUser = userService.updateNickName(userId, nickName, imagePath);
+        logger.info("Updated User Info: Nickname - {}, ImagePath - {}", updatedUser.getNickname(), updatedUser.getProfileImage());
+
+        return ResponseEntity.ok(Map.of("message", "수정 성공!", "profileImage", updatedUser.getProfileImage()));
+    }
+
+
+    @PutMapping("/update/password")
+    public ResponseEntity<Map<String, String>> updatePassword(
+            @RequestBody Map<String, String> requestBody,
+            @CookieValue(value = "sessionId", required = false) String sessionId) {
+        Long userId = sessionStorage.getUserId(sessionId);
+        User newUser = userService.updatePassword(userId, requestBody.get("password"));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Map.of("message", "수정 성공!"));
+    }
+
+    @DeleteMapping("/resign")
+    public ResponseEntity<Map<String, String>> resign(
+            @CookieValue(value = "sessionId", required = false) String sessionId) {
+        Long userId = sessionStorage.getUserId(sessionId);
+        userService.deleteUser(userId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Map.of("message", "탈퇴 성공!"));
     }
 }

@@ -31,7 +31,6 @@ public class PostController {
     Logger logger = LoggerFactory.getLogger(PostController.class);
 
     private final PostService postService;
-    private final CommentService commentService;
     private final SessionStorage sessionStorage;
 
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/postImage/";
@@ -45,11 +44,9 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<Map<String, Object>> getPost(@PathVariable Long postId) {
         PostsDto postsDto = postService.getPost(postId);
-        List<CommentDto> comments = commentService.getAllComments(postId);
         Map<String, Object> response = new HashMap<>();
         response.put("message", "ok");
         response.put("post", postsDto);
-        response.put("comments", comments);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
@@ -98,21 +95,29 @@ public class PostController {
 
         PostsDto existingPost = postService.getPost(postId);
         String imagePath = existingPost.getImage(); // 기존 이미지 유지
+        logger.info(imagePath);
+        if (imagePath != null && !imagePath.isEmpty()) {
+            File oldFile = new File(imagePath.substring(1));
+            logger.info("삭제할 파일 존재 여부: " + oldFile.exists());
+            try{
+                oldFile.delete();
+            } catch (Exception e){
+                logger.warn("기존 이미지 삭제 실패 : " + e.getMessage());
+            }
+        }
         if (image != null && !image.isEmpty()) {
             try {
                 String fileName = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
                 File destFile = new File(UPLOAD_DIR + fileName);
                 image.transferTo(destFile);
                 imagePath = "/uploads/postImage/" + fileName;
+                PostUpdateDto updateDto = new PostUpdateDto(title, content, imagePath);
+                PostsDto post = postService.updatePost(postId, userId, updateDto);
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "이미지 저장 실패"));
             }
         }
-        PostUpdateDto updateDto = new PostUpdateDto(title, content, imagePath);
-        PostsDto post = postService.updatePost(postId, userId, updateDto);
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "수정 성공!");
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(response);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Map.of("message", "수정 성공!"));
     }
 
     @DeleteMapping("/{postId}")
