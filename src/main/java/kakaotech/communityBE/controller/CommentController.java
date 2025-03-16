@@ -1,8 +1,7 @@
 package kakaotech.communityBE.controller;
 
 import kakaotech.communityBE.dto.CommentDto;
-import kakaotech.communityBE.entity.Comment;
-import kakaotech.communityBE.repository.SessionStorage;
+import kakaotech.communityBE.SessionStorage;
 import kakaotech.communityBE.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

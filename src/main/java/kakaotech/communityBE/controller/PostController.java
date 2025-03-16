@@ -1,11 +1,8 @@
 package kakaotech.communityBE.controller;
 
-import jakarta.servlet.http.HttpSession;
-import kakaotech.communityBE.dto.CommentDto;
 import kakaotech.communityBE.dto.PostUpdateDto;
 import kakaotech.communityBE.dto.PostsDto;
-import kakaotech.communityBE.repository.SessionStorage;
-import kakaotech.communityBE.service.CommentService;
+import kakaotech.communityBE.SessionStorage;
 import kakaotech.communityBE.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;

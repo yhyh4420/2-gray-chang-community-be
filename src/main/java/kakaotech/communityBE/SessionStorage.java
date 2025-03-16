@@ -1,4 +1,4 @@
-package kakaotech.communityBE.repository;
+package kakaotech.communityBE;
 
 import org.springframework.stereotype.Component;
 
