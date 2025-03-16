@@ -5,6 +5,7 @@ import kakaotech.communityBE.dto.LoginDto;
 import kakaotech.communityBE.entity.User;
 import kakaotech.communityBE.SessionStorage;
 import kakaotech.communityBE.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin(origins = "http://localhost:5500")
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
@@ -29,10 +31,6 @@ public class UserController {
 
     private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/profile/";
     private static final String DEFAULT_IMAGE_PATH = "/uploads/profile/default-profile.jpg"; // 기본 프로필 이미지
-
-    public UserController(UserService userService, SessionStorage sessionStorage) {
-        this.userService = userService;
-    }
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(
