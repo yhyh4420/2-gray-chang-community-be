@@ -5,13 +5,19 @@ import kakaotech.communityBE.entity.User;
 import kakaotech.communityBE.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.File;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -27,21 +33,30 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public User login(String email, String password) {
         // 사용자 존재 여부 확인
         User user = userRepository.findByEmail(email).orElseThrow(() -> {
             logger.warn("등록되지 않은 이메일: {}", email);
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "등록되지 않은 이메일입니다.");
         });
+        if (user.isResigned()){
+            logger.warn("탈퇴 처리된 이메일: {}", email);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "탈퇴처리된 이메일입니다.");
+        }
         // 비밀번호 검증
         if (!passwordEncoder.matches(password, user.getPassword())) {
             logger.warn("잘못된 비밀번호 입력: 이메일({})", email);
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "이메일이나 비밀번호가 잘못되었습니다.");
+        }
         logger.info("사용자 로그인 성공: {}", email);
         return user;
     }
 
+    @Transactional
     public void logout(HttpSession session) {
         if (session != null) {
             session.invalidate();
@@ -51,6 +66,7 @@ public class UserService {
         } // else를 통해 세션이 있을 때만 로그아웃하도록 함
     }
 
+    @Transactional
     public User signUp(String email, String password, String nickname, String profileImage) {
         //일단 중복되는지 확인
         Optional<User> userfinByemail = userRepository.findByEmail(email);
@@ -75,6 +91,42 @@ public class UserService {
     }
 
     public User findById(Long userId) {
-        return userRepository.findById(userId).orElse(null);
+        return userRepository.findById(userId)
+                .orElseThrow(()->{
+                    logger.warn("유저 없음, userId : {}", userId);
+                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다.");
+                });
+    }
+
+    @Transactional
+    public User updateNickName(Long userId, String nickname, String profileImage) {
+        User user = findById(userId);
+        user.setNickname(nickname);
+        user.setProfileImage(profileImage);
+        return user;
+    }
+
+    @Transactional
+    public User updatePassword(Long userId, String newPassword) {
+        User user = findById(userId);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        return user;
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = findById(userId);
+        //기존 프로필사진 삭제
+        String oldProfileImage = user.getProfileImage();
+        if (!Objects.equals(oldProfileImage, "/uploads/profile/default-profile.jpg")) {
+            logger.info("현재 이미지 : {}", oldProfileImage);
+            File oldFile = new File(oldProfileImage.substring(1));
+            oldFile.delete();
+        }
+        user.setNickname("탈퇴한 사용자");
+        user.setProfileImage("/uploads/profile/resign.png"); // todo : 이건 나중에 변수로 따로 선언
+        user.setResigned(true);
+        user.setEmail("deleted" + UUID.randomUUID().toString().substring(0, 35)); // 이러면 혹시모를 중복가입 안되겠지..?
+        user.setPassword(passwordEncoder.encode(userId + UUID.randomUUID().toString().substring(0, 10))); // 이러면 비밀번호 추론 불가
     }
 }
