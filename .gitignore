@@ -13,7 +13,7 @@
 .idea/**/dictionaries
 .idea/**/shelf
 *.imi
-
+*.rdb
 # AWS User-specific
 .idea/**/aws.xml
 
