@@ -3,6 +3,7 @@ package kakaotech.communityBE.service;
 import kakaotech.communityBE.SessionStorage;
 import kakaotech.communityBE.entity.User;
 import kakaotech.communityBE.repository.UserRepository;
+import kakaotech.communityBE.util.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,8 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 @Service
@@ -24,11 +23,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final SessionStorage sessionStorage;
-
-    private static final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/profile/";
-    private static final String DEFAULT_IMAGE_PATH = "/uploads/profile/default-profile.jpg"; // 기본 프로필 이미지
-    private static final String RESIGN_IMAGE_PATH = "/uploads/profile/resign.jpg"; // 탈퇴 회원 프로필 이미지
-
 
     @Autowired
     public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, SessionStorage sessionStorage, SessionStorage sessionStorage1) {
@@ -80,76 +74,48 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "중복되는 닉네임입니다.");
         }
 
-        String encodedPassword = passwordEncoder.encode(password);
+        String profileImagePath = FileUtil.getDefaultProfileImage();
 
-        String profileImagePath = DEFAULT_IMAGE_PATH;
-        File uploadDir = new File(UPLOAD_DIR);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
-        }
-
-        if (imageFile != null && !imageFile.isEmpty()) {
-            try {
-                String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
-                File destFile = new File(UPLOAD_DIR + fileName);
-                logger.info("업로드 디렉터리 존재 여부: " + new File(UPLOAD_DIR).exists());
-                logger.info("파일 경로: " + destFile.getAbsolutePath());
-                logger.info("파일 크기: " + imageFile.getSize() + " bytes");
-                imageFile.transferTo(destFile);
-                profileImagePath = "/uploads/profile/" + fileName; // 저장된 이미지 경로
-            } catch (IOException e) {
-                logger.error(e.getMessage());
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드 실패");
+        try {
+            String uploadedImagePath = FileUtil.saveProfileImage(imageFile);
+            if (uploadedImagePath != null) {
+                profileImagePath = uploadedImagePath;
+                logger.info("실제 저장된 프로필 이미지 이름 : {}", profileImagePath);
             }
+        } catch (Exception e) {
+            logger.error("프로필 이미지 저장 실패: {}", e.getMessage());
         }
 
         User newUser = new User();
-        newUser.setEmail(email);
-        newUser.setPassword(encodedPassword);
         newUser.setNickname(nickname);
+        newUser.setPassword(passwordEncoder.encode(password));
+        newUser.setEmail(email);
         newUser.setProfileImage(profileImagePath);
+        userRepository.save(newUser);
     }
 
     public User findById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(()->{
                     logger.warn("유저 없음, userId : {}", userId);
-                    throw new ResponseStatusException(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다.");
+                    return new ResponseStatusException(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다.");
                 });
     }
 
     @Transactional
     public User updateNickName(Long userId, String nickname, MultipartFile imageFile) {
         User user = findById(userId);
-        String oldImagePath = user.getProfileImage();
 
-        logger.info("UserId: {}, OldImagePath: {}, NewNickname: {}", user.getId(), oldImagePath, nickname);
-
-        // 기존 이미지 삭제 (이전 이미지가 기본 이미지가 아닐 때만 삭제)
-        if (oldImagePath != null && !oldImagePath.equals(DEFAULT_IMAGE_PATH)) {
-            File oldFile = new File(oldImagePath.substring(1)); // 앞에 '/' 제거
-            if (oldFile.exists()) {
-                boolean deleted = oldFile.delete();
-                logger.info("Old Image Deleted: {}", deleted);
+        FileUtil.deleteFile(user.getProfileImage());
+        String imagePath = FileUtil.getDefaultProfileImage();
+        try {
+            String uploadedImage = FileUtil.saveProfileImage(imageFile);
+            if (uploadedImage != null) {
+                imagePath = uploadedImage;
             }
+        } catch (Exception e) {
+            logger.error("프로필 이미지 저장 실패: {}", e.getMessage());
         }
-
-        String imagePath = DEFAULT_IMAGE_PATH; // 기본 프로필 이미지 경로
-
-        // 새로운 이미지 저장
-        if (imageFile != null && !imageFile.isEmpty()) {
-            try {
-                String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
-                File destFile = new File(UPLOAD_DIR + fileName);
-                imageFile.transferTo(destFile);
-                imagePath = "/uploads/profile/" + fileName; // 클라이언트에서 접근할 수 있도록 경로 설정
-                logger.info("New Profile Image Saved: {}", imagePath);
-            } catch (IOException e) {
-                logger.error("새 프로필 이미지 저장 에러 : {}", e.getMessage());
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드 실패");
-            }
-        }
-
         user.setNickname(nickname);
         user.setProfileImage(imagePath);
         return user;
@@ -165,14 +131,13 @@ public class UserService {
     public void deleteUser(Long userId) {
         User user = findById(userId);
         //기존 프로필사진 삭제
-        String oldProfileImage = user.getProfileImage();
-        if (!Objects.equals(oldProfileImage, "/uploads/profile/default-profile.jpg")) {
-            logger.info("현재 이미지 : {}", oldProfileImage);
-            File oldFile = new File(oldProfileImage.substring(1));
-            oldFile.delete();
-        }
-        user.setNickname("탈퇴한 사용자");
-        user.setProfileImage("/uploads/profile/resign.png"); // todo : 이건 나중에 변수로 따로 선언
+        FileUtil.deleteFile(user.getProfileImage());
+        String deleteNickname;
+        do{
+            deleteNickname = "탈퇴유저_" + UUID.randomUUID().toString().replaceAll("-", "").substring(0, 5);
+        } while (userRepository.findByNickname(deleteNickname).isPresent());
+        user.setNickname(deleteNickname);
+        user.setProfileImage(FileUtil.getResignProfileImage());
         user.setResigned(true);
         user.setEmail("deleted" + UUID.randomUUID().toString().substring(0, 35)); // 이러면 혹시모를 중복가입 안되겠지..?
         user.setPassword(passwordEncoder.encode(userId + UUID.randomUUID().toString().substring(0, 10))); // 이러면 비밀번호 추론 불가
