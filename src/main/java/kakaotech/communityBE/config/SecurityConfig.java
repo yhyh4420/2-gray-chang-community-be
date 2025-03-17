@@ -1,4 +1,4 @@
-package kakaotech.communityBE;
+package kakaotech.communityBE.config;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
