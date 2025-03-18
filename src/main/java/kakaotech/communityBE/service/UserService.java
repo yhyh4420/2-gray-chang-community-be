@@ -25,10 +25,10 @@ public class UserService {
     private final SessionStorage sessionStorage;
 
     @Autowired
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, SessionStorage sessionStorage, SessionStorage sessionStorage1) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, SessionStorage sessionStorage) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.sessionStorage = sessionStorage1;
+        this.sessionStorage = sessionStorage;
     }
 
     @Transactional
@@ -38,10 +38,6 @@ public class UserService {
             logger.warn("등록되지 않은 이메일: {}", email);
             return new ResponseStatusException(HttpStatus.NOT_FOUND, "등록되지 않은 이메일입니다.");
         });
-        if (user.isResigned()){
-            logger.warn("탈퇴 처리된 이메일: {}", email);
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "탈퇴처리된 이메일입니다.");
-        }
         // 비밀번호 검증
         if (!passwordEncoder.matches(password, user.getPassword())) {
             logger.warn("잘못된 비밀번호 입력: 이메일({})", email);
@@ -114,7 +110,7 @@ public class UserService {
                 imagePath = uploadedImage;
             }
         } catch (Exception e) {
-            logger.error("프로필 이미지 저장 실패: {}", e.getMessage());
+            logger.error("프로필 수정이미지 저장 실패: {}", e.getMessage());
         }
         user.setNickname(nickname);
         user.setProfileImage(imagePath);

@@ -35,7 +35,7 @@ public class CommentController {
             @RequestBody Map<String, String> request,
             @PathVariable("postId") Long postId,
             @CookieValue(value = "sessionId", required = false) String sessionId) {
-        Long userId = (Long) sessionStorage.getUserId(sessionId);
+        Long userId = sessionStorage.getUserId(sessionId);
         String content = request.get("content");
         logger.info("userId : {}, content : {}, postId : {}", userId, content, postId);
         CommentDto comment = commentService.createComment(userId, postId, content);
@@ -47,7 +47,7 @@ public class CommentController {
             @PathVariable Long commentId,
             @RequestParam("content") String content,
             @CookieValue(value = "sessionId", required = false) String sessionId) {
-        Long userId = (Long) sessionStorage.getUserId(sessionId);
+        Long userId = sessionStorage.getUserId(sessionId);
         logger.info("userId : {}, content : {}, commentId : {}", userId, content, commentId);
         CommentDto commentDto = commentService.updateComment(userId, commentId, content);
         Map<String, Object> response = new HashMap<>();
@@ -60,7 +60,7 @@ public class CommentController {
             @PathVariable Long postId,
             @PathVariable Long commentId,
             @CookieValue(value = "sessionId", required = false) String sessionId){
-        Long userId = (Long) sessionStorage.getUserId(sessionId);
+        Long userId = sessionStorage.getUserId(sessionId);
         logger.info("userId : {}, postId : {}, commentId : {}", userId, postId, commentId);
         commentService.deleteComment(userId, commentId);
         Map<String, Object> response = new HashMap<>();
