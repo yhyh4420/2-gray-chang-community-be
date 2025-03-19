@@ -1,7 +1,6 @@
 package kakaotech.communityBE.repository;
 
 import jakarta.persistence.EntityManager;
-import kakaotech.communityBE.controller.PostController;
 import kakaotech.communityBE.entity.Comment;
 import kakaotech.communityBE.entity.Posts;
 import kakaotech.communityBE.entity.User;
@@ -13,11 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.util.StopWatch;
 
 import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Random;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -31,6 +29,7 @@ class PostRepositoryTest {
 
     private static final Logger log = LoggerFactory.getLogger(PostRepositoryTest.class);
     private Long postId;
+    private StopWatch stopWatch = new StopWatch();
 
     @BeforeEach
     void setUp() {
@@ -61,52 +60,74 @@ class PostRepositoryTest {
     }
 
     @Test
-    void fetchjoin없는_일반findAll() {
+    void findAll_성능비교() {
         //n+1문제 발생
         System.out.println("----------------------");
+        stopWatch.start("일반 findAll");
         List<Posts> posts = postRepository.findAll();
         for (Posts post : posts) {
             System.out.println(post.getTitle());
-
             for (Comment comment : post.getComments()) {
                 System.out.print(comment.getId() + "  ");
             }
         }
-    }
-
-    @Test
-    void fetchjoin_findAll() {
-        //n+1문제 발생
+        stopWatch.stop();
         System.out.println("----------------------");
-        List<Posts> posts = postRepository.findAllFetch();
-        for (Posts post : posts) {
+        stopWatch.start("fetch join findAll");
+        List<Posts> postsfetch = postRepository.findAllFetch();
+        for (Posts post : postsfetch) {
             System.out.println(post.getTitle());
 
             for (Comment comment : post.getComments()) {
                 System.out.print(comment.getId() + "  ");
             }
         }
+        stopWatch.stop();
+
+        System.out.println(stopWatch.prettyPrint());
     }
 
+    /*
+    ----------------------------------------
+    Seconds       %       Task name
+    ----------------------------------------
+    0.04077075    86%     일반 findAll
+    0.006701583   14%     fetch join findAll
+
+    일반 findAll보다 성능이 83% 향상되었다.
+     */
+
     @Test
-    void 일반_findById(){
+    void findById_성능비교(){
         System.out.println("----------------------");
         // n+1 문제 발생
-        Posts post = postRepository.findById(postId).get();
+        stopWatch.start("일반 findById");
+        Posts post = postRepository.findById(postId).isPresent() ? postRepository.findById(postId).get() : null;
         for (Comment comment : post.getComments()) {
             System.out.print(comment.getId() + " ");
         }
         System.out.println();
-    }
-
-    @Test
-    void fetchJoin_findbyId(){
+        stopWatch.stop();
         System.out.println("----------------------");
-        // n+1 문제 발생
-        Posts post = postRepository.findbyIdFetch(postId).get();
-        for (Comment comment : post.getComments()) {
+        stopWatch.start("fetch join findById");
+        Posts postfetch = postRepository.findbyIdFetch(postId).isPresent() ? postRepository.findbyIdFetch(postId).get() : null;
+        for (Comment comment : postfetch.getComments()) {
             System.out.print(comment.getId() + " ");
         }
         System.out.println();
+        stopWatch.stop();
+        System.out.println(stopWatch.prettyPrint());
     }
+
+    /*
+    ----------------------------------------
+    Seconds       %       Task name
+    ----------------------------------------
+    0.005303667   44%     일반 findById
+    0.006709583   56%     fetch join findById
+
+    결과를 보면 일반 findbyId가 더 성능이 좋다. 생각해보면 당연한게, findbyId는 원래 한개의 엔티티만 조회한다.
+    오히려 괜한 inner join 연산으로 성능이 떨어진 것이다.
+    findByIdFetch는 테스트코드의 컴파일 에러를 방지하기 위해 로직은 남겨두되 실제 서비스로직에서는 사용하지 않을 예정
+     */
 }
