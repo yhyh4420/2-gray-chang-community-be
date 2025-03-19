@@ -15,27 +15,24 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.StopWatch;
 
 import java.util.List;
-import java.util.Random;
 
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class PostRepositoryTest {
+class PostRepositoryQueryTest {
 
     @Autowired
     private PostRepository postRepository;
     @Autowired
     private EntityManager em;
 
-    private static final Logger log = LoggerFactory.getLogger(PostRepositoryTest.class);
     private Long postId;
-    private StopWatch stopWatch = new StopWatch();
+    private final StopWatch stopWatch = new StopWatch();
 
     @BeforeEach
     void setUp() {
         em.clear();
 
-        // 기존 User 유지
         User user = new User();
         user.setNickname("nickname");
         user.setEmail("email");
@@ -48,8 +45,9 @@ class PostRepositoryTest {
         posts.setTitle("title");
         posts.setContent("content");
         em.persist(posts);
+        postId = posts.getId();
 
-        for (int i=0; i==10; i++) {
+        for (int i=0; i<10; i++) {
             Comment comment = new Comment();
             comment.setPosts(posts);
             comment.setUser(user);

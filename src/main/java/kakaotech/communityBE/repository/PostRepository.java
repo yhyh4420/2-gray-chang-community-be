@@ -28,6 +28,4 @@ public interface PostRepository extends JpaRepository<Posts, Long> {
 
     @Query("select distinct p from Posts p left join fetch p.comments where p.id = :postId")
     Optional<Posts> findbyIdFetch(@Param("postId") Long postId);
-
-
 }
