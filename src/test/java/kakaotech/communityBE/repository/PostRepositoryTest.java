@@ -34,55 +34,64 @@ class PostRepositoryTest {
     @BeforeEach
     void setUp() {
         em.clear();
+
+        // 기존 User 유지
         User user = new User();
         user.setNickname("nickname");
         user.setEmail("email");
         user.setPassword("password");
         em.persist(user);
 
+
         Posts posts = new Posts();
         posts.setUser(user);
         posts.setTitle("title");
         posts.setContent("content");
         em.persist(posts);
-        postId = posts.getId();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i=0; i==10; i++) {
             Comment comment = new Comment();
             comment.setPosts(posts);
             comment.setUser(user);
             comment.setComment("comment" + i);
             em.persist(comment);
         }
-
         em.flush();
         em.clear();
     }
+
 
     @Test
     void findAll_성능비교() {
         //n+1문제 발생
         System.out.println("----------------------");
+        em.clear();
         stopWatch.start("일반 findAll");
         List<Posts> posts = postRepository.findAll();
         for (Posts post : posts) {
-            System.out.println(post.getTitle());
             for (Comment comment : post.getComments()) {
-                System.out.print(comment.getId() + "  ");
             }
         }
         stopWatch.stop();
+        em.clear();
+        System.out.println("----------------------");
+        stopWatch.start("entityGraph findAll");
+        List<Posts> postsEntithGraph = postRepository.findAllEntityGraph();
+        for (Posts post : postsEntithGraph) {
+            for (Comment comment : post.getComments()) {
+            }
+        }
+        stopWatch.stop();
+        em.clear();
         System.out.println("----------------------");
         stopWatch.start("fetch join findAll");
         List<Posts> postsfetch = postRepository.findAllFetch();
         for (Posts post : postsfetch) {
-            System.out.println(post.getTitle());
-
             for (Comment comment : post.getComments()) {
-                System.out.print(comment.getId() + "  ");
             }
         }
         stopWatch.stop();
+        em.clear();
 
         System.out.println(stopWatch.prettyPrint());
     }
@@ -91,10 +100,11 @@ class PostRepositoryTest {
     ----------------------------------------
     Seconds       %       Task name
     ----------------------------------------
-    0.04077075    86%     일반 findAll
-    0.006701583   14%     fetch join findAll
+    0.037745709   74%     일반 findAll
+    0.010377709   20%     entityGraph findAll
+    0.002919583   06%     fetch join findAll
 
-    일반 findAll보다 성능이 83% 향상되었다.
+    일반 findAll보다 fetch join의 성능이 92% 향상되었다.
      */
 
     @Test

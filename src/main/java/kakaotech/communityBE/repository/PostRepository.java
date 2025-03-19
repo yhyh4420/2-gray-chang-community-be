@@ -1,6 +1,7 @@
 package kakaotech.communityBE.repository;
 
 import kakaotech.communityBE.entity.Posts;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -21,6 +22,12 @@ public interface PostRepository extends JpaRepository<Posts, Long> {
     @Query("select p from Posts p left join fetch p.comments")
     List<Posts> findAllFetch();
 
-    @Query("select p from Posts p left join fetch p.comments where p.id = :postId")
+    @EntityGraph(attributePaths = {"comments"})
+    @Query("select p from Posts p")
+    List<Posts> findAllEntityGraph();
+
+    @Query("select distinct p from Posts p left join fetch p.comments where p.id = :postId")
     Optional<Posts> findbyIdFetch(@Param("postId") Long postId);
+
+
 }
