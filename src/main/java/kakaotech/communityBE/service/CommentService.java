@@ -45,7 +45,7 @@ public class CommentService {
     }
 
     private Posts getPost(Long postId) {
-        Posts post = postRepository.findById(postId)
+        Posts post = postRepository.findbyIdFetch(postId)
                 .orElseThrow(()->{
                     logger.warn("게시글 없음 : {}", postId);
                     return new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글을 찾을 수 없습니다.");

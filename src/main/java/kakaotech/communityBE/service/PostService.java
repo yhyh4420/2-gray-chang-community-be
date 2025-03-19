@@ -73,7 +73,7 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public List<PostsDto> getAllPosts() {
-        List<Posts> posts = postRepository.findAll();
+        List<Posts> posts = postRepository.findAllFetch();
         List<PostsDto> postsDtos = posts.stream()
                 .map(PostsDto::new)
                 .toList();
