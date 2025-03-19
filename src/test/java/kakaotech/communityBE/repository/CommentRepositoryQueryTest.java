@@ -92,6 +92,6 @@ class CommentRepositoryQueryTest {
     0.035770375   64%     일반 findAllbyPost
     0.020250792   36%     fetch join findAllbyPost
 
-    fetch join으로 post별 comment를 찾는 쿼리 수정 결과 기존 쿼리 대비 43% 성능 향상
+    fetch join으로 post별 comment를 찾는 쿼리 수정 결과 기존 쿼리 대비 약 43% 성능 향상
      */
 }
