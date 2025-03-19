@@ -68,7 +68,7 @@ public class CommentService {
     @Transactional(readOnly = true)
     public List<CommentDto> getAllComments(Long postId) {
         Posts post = getPost(postId);
-        List<Comment> comments = commentRepository.findAllByPosts(post);
+        List<Comment> comments = commentRepository.findAllByPostsFetch(post);
         List<CommentDto> commentDtos = comments.stream()
                 .map(CommentDto::new)
                 .toList();
