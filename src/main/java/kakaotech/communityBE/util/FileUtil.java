@@ -15,8 +15,8 @@ public class FileUtil {
     private static final String BASE_UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/";
     private static final String PROFILE_DIR = BASE_UPLOAD_DIR + "profile/";
     private static final String POST_DIR = BASE_UPLOAD_DIR + "postImage/";
-    private static final String DEFAULT_PROFILE_IMAGE = PROFILE_DIR + "default-profile.jpg";
-    private static final String RESIGN_PROFILE_IMAGE = PROFILE_DIR + "resign.png";
+    private static final String DEFAULT_PROFILE_IMAGE = "/uploads/profile/" + "default-profile.png";
+    private static final String RESIGN_PROFILE_IMAGE = "/uploads/profile/" + "resign.png";
 
     public static String saveProfileImage(MultipartFile file) throws IOException {
         return saveFile(file, PROFILE_DIR);
@@ -63,6 +63,8 @@ public class FileUtil {
         File destFile = new File(directory + fileName);
         imageFile.transferTo(destFile);
         logger.info("파일 저장 완료: {}", destFile.getAbsolutePath());
+
+        logger.info("/uploads/" + directory.substring(BASE_UPLOAD_DIR.length()) + fileName);
 
         return "/uploads/" + directory.substring(BASE_UPLOAD_DIR.length()) + fileName;
     }
