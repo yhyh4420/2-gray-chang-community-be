@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.util.StopWatch;
 
 import java.util.List;
+import java.util.Random;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -28,34 +29,11 @@ class PostRepositoryQueryTest {
 
     private Long postId;
     private final StopWatch stopWatch = new StopWatch();
+    private final Random random = new Random();
 
     @BeforeEach
     void setUp() {
-        em.clear();
-
-        User user = new User();
-        user.setNickname("nickname");
-        user.setEmail("email");
-        user.setPassword("password");
-        em.persist(user);
-
-
-        Posts posts = new Posts();
-        posts.setUser(user);
-        posts.setTitle("title");
-        posts.setContent("content");
-        em.persist(posts);
-        postId = posts.getId();
-
-        for (int i=0; i<10; i++) {
-            Comment comment = new Comment();
-            comment.setPosts(posts);
-            comment.setUser(user);
-            comment.setComment("comment" + i);
-            em.persist(comment);
-        }
-        em.flush();
-        em.clear();
+        postId = postRepository.findAll().get(random.nextInt(1000)).getId();
     }
 
 
