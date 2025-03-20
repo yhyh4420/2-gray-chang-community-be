@@ -1,11 +1,18 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/practice_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    hikari:
+      maximum-pool-size: 10  # 최대 10개의 커넥션 허용
+      minimum-idle: 5        # 최소 유휴 커넥션 5개 유지
+      idle-timeout: 30000    # 유휴 커넥션 30초 후 닫기
+      connection-timeout: 30000  # 30초 동안 커넥션이 없으면 타임아웃
+      max-lifetime: 1800000  # 30분 후 커넥션 재생성
+    url: jdbc:mysql://localhost:3306/test_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: root
+    username: test_user
+    password: test_password
   jpa:
     database-platform: org.hibernate.dialect.MySQL8Dialect
+    defer-datasource-initialization: true
     hibernate:
       ddl-auto: update
     show-sql: false

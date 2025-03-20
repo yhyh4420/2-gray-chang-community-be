@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StopWatch;
 
 import java.util.List;
@@ -32,33 +33,8 @@ class CommentRepositoryQueryTest {
 
     @BeforeEach
     public void setUp() {
-        em.clear();
-
-        User user = new User();
-        user.setNickname("nickname");
-        user.setEmail("email");
-        user.setPassword("password");
-        em.persist(user);
-
-        for (int i=0; i<1000; i++){
-            Posts post = new Posts();
-            post.setUser(user);
-            post.setTitle("title"+i);
-            post.setContent("content"+i);
-            em.persist(post);
-            for (int j=0;j<1000;j++){
-                Comment comment = new Comment();
-                comment.setComment("comment"+j);
-                comment.setUser(user);
-                comment.setPosts(post);
-                em.persist(comment);
-            }
-        }
-
-        em.flush();
-        em.clear();
-
-        flagPost = postRepository.findAll().get(random.nextInt(10));
+        int size = postRepository.findAll().size();
+        flagPost = postRepository.findAll().get(random.nextInt(size));
     }
 
     @Test
@@ -89,8 +65,8 @@ class CommentRepositoryQueryTest {
     ----------------------------------------
     Seconds       %       Task name
     ----------------------------------------
-    0.035770375   64%     일반 findAllbyPost
-    0.020250792   36%     fetch join findAllbyPost
+    0.057457459   67%     일반 findAllbyPost
+    0.028715208   33%     fetch join findAllbyPost
 
     fetch join으로 post별 comment를 찾는 쿼리 수정 결과 기존 쿼리 대비 약 43% 성능 향상
      */
