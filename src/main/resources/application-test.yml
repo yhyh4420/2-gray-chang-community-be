@@ -16,9 +16,12 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+    properties:
+      hibernate:
+        generate_statistics: true
   sql:
     init:
-      mode: always
+      mode: never
   data:
     redis:
       host: localhost
