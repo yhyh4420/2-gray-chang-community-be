@@ -8,6 +8,7 @@ import kakaotech.communityBE.repository.LikeRepository;
 import kakaotech.communityBE.repository.PostRepository;
 import kakaotech.communityBE.repository.UserRepository;
 import kakaotech.communityBE.util.FileUtil;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,19 +25,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
     private static final Logger logger = LoggerFactory.getLogger(PostService.class);
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final LikeRepository likeRepository;
-
-    @Autowired
-    public PostService(UserRepository userRepository, PostRepository postRepository, LikeRepository likeRepository) {
-        this.userRepository = userRepository;
-        this.postRepository = postRepository;
-        this.likeRepository = likeRepository;
-    }
 
     @Transactional
     public void createPost(Long userId, String title, String content, MultipartFile imageFile){

@@ -8,6 +8,7 @@ import kakaotech.communityBE.entity.User;
 import kakaotech.communityBE.repository.CommentRepository;
 import kakaotech.communityBE.repository.PostRepository;
 import kakaotech.communityBE.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class CommentService {
 
     private final Logger logger = LoggerFactory.getLogger(CommentService.class);
@@ -28,12 +30,6 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final PostRepository postRepository;
-
-    public CommentService(CommentRepository commentRepository, UserRepository userRepository, PostRepository postRepository) {
-        this.commentRepository = commentRepository;
-        this.userRepository = userRepository;
-        this.postRepository = postRepository;
-    }
 
     private User getUser(Long userId) {
         User user = userRepository.findById(userId)
