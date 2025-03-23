@@ -22,7 +22,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/posts")
-@CrossOrigin(origins = "http://localhost:5500")
 @RequiredArgsConstructor
 public class PostController {
 

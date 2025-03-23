@@ -16,7 +16,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("posts/{postId}/comment")
-@CrossOrigin(origins = "http://localhost:5500")
 @RequiredArgsConstructor
 public class CommentController {
 
