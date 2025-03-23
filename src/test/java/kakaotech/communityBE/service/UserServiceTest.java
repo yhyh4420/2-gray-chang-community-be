@@ -40,9 +40,6 @@ class UserServiceTest {
     private BCryptPasswordEncoder passwordEncoder;
 
     @Mock
-    private FileUtil fileUtil;
-
-    @Mock
     private SessionStorage sessionStorage;
 
     @Mock

@@ -1,7 +1,8 @@
 package kakaotech.communityBE.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.TestInstance;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PostServiceTest {
 
 }

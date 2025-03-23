@@ -45,8 +45,7 @@ public class UserController {
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return ResponseEntity.ok(Map.of("message", "로그인 성공",
-                "nickname", user.getNickname()));
+        return ResponseEntity.ok(Map.of("message", "로그인 성공", "nickname", user.getNickname()));
     }
 
     @PostMapping("/logout")
@@ -103,7 +102,7 @@ public class UserController {
         User updatedUser = userService.updateNickName(user.getId(), nickName, imageFile);
         logger.info("Updated User Info: Nickname - {}, ImagePath - {}", updatedUser.getNickname(), updatedUser.getProfileImage());
 
-        return ResponseEntity.ok(Map.of("message", "수정 성공!", "profileImage", updatedUser.getProfileImage()));
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(Map.of("message", "수정 성공!"));
     }
 
 
