@@ -16,13 +16,16 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+    properties:
+      hibernate:
+        generate_statistics: true
   sql:
     init:
-      mode: always
+      mode: never
   data:
     redis:
       host: localhost
-      port: 6379
+      port: 6380
       timeout: 3000ms
       lettuce:
         pool:
@@ -30,6 +33,7 @@ spring:
           max-idle: 8
           min-idle: 2
           max-wait: 5000ms
+      database: 1
   session:
     store-type: redis
     timeout: 1800s
