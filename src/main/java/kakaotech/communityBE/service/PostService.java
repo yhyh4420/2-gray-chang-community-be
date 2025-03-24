@@ -45,7 +45,8 @@ public class PostService {
                 imagePath = uploadedImage;
             }
         } catch (Exception e) {
-            logger.error("프로필 이미지 저장 실패: {}", e.getMessage());
+            logger.error("이미지 저장 실패: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "이미지 업로드 실패");
         }
         posts.setUser(user);
         posts.setTitle(title);
