@@ -126,6 +126,18 @@ class UserServiceTest {
     }
 
     @Test
+    void 로그인_실패_잘못된이메일() {
+        // given
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> userService.login(user.getEmail(), "password"))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("등록되지 않은 이메일입니다.")
+                .hasMessageContaining("404");
+    }
+
+    @Test
     void 로그인_실패_잘못된비밀번호() {
         // given
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
@@ -133,8 +145,9 @@ class UserServiceTest {
 
         // when & then
         assertThatThrownBy(() -> userService.login(user.getEmail(), "wrongPassword"))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("비밀번호가 틀렸습니다.");
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining("비밀번호가 틀렸습니다.")
+                .hasMessageContaining("404");
     }
 
     @Test
@@ -193,12 +206,32 @@ class UserServiceTest {
     }
 
     @Test
+    void 세션으로_사용자_조회_실패_세션없음() {
+        // when & then
+        assertThatThrownBy(() -> userService.getUserBySession(null))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining(HttpStatus.UNAUTHORIZED.toString());
+    }
+
+    @Test
     void 세션으로_사용자_조회_실패_잘못된세션() {
         // given
         when(sessionStorage.isValidSession("invalidSessionId")).thenReturn(false);
 
         // when & then
         assertThatThrownBy(() -> userService.getUserBySession("invalidSessionId"))
+                .isInstanceOf(ResponseStatusException.class)
+                .hasMessageContaining(HttpStatus.UNAUTHORIZED.toString());
+    }
+
+    @Test
+    void 세션으로_사용자_조회_실패_유효한세션_유저아이디없음() {
+        // given
+        when(sessionStorage.isValidSession("validSessionId")).thenReturn(true);
+        when(sessionStorage.getUserId("validSessionId")).thenReturn(null);
+
+        // when & then
+        assertThatThrownBy(() -> userService.getUserBySession("validSessionId"))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining(HttpStatus.UNAUTHORIZED.toString());
     }
