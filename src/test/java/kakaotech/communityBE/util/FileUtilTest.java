@@ -107,7 +107,7 @@ class FileUtilTest {
         File savedFile = new File(PROFILE_DIR + savedPath.substring(savedPath.lastIndexOf("/") + 1));
 
         // when
-        boolean deleteResult = FileUtil.deleteFile(savedPath);
+        FileUtil.deleteFile(savedPath);
 
         // then
         assertThat(savedFile.exists()).isFalse();
