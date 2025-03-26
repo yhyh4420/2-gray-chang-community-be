@@ -23,8 +23,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+    private final UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(
@@ -34,12 +34,12 @@ public class UserController {
         String sessionId = (String) login.get("sessionId");
         User user = (User) login.get("user");
         ResponseCookie cookie = ResponseCookie.from("sessionId", sessionId)
-                                .path("/")
-                                .domain("localhost")
-                                .httpOnly(true)
-                                .sameSite("None")
-                                .secure(true)
-                                .build();
+                .path("/")
+                .domain("localhost")
+                .httpOnly(true)
+                .sameSite("None")
+                .secure(true)
+                .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
@@ -99,7 +99,7 @@ public class UserController {
 
         User updatedUser = userService.updateNickName(user.getId(), nickName, imageFile);
         logger.info("Updated User Info: Nickname - {}, ImagePath - {}", updatedUser.getNickname(), updatedUser.getProfileImage());
-        return ResponseUtil.created("수정 완료!");
+        return ResponseUtil.noContent("수정 성공!");
     }
 
 
