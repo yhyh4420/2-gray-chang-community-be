@@ -28,7 +28,7 @@ class UserControllerTest {
     User mockUser = new User();
 
     @Autowired
-    private MockMvc mvc;
+    private MockMvc mockMvc;
 
     @MockitoBean
     private UserService userService;
@@ -44,7 +44,7 @@ class UserControllerTest {
     }
 
     @Test
-    void login_shouldReturnSuccessWithCookie() throws Exception {
+    void 로그인() throws Exception {
         String email = "test@example.com";
         String password = "password123";
         String sessionId = "session-abc";
@@ -66,7 +66,7 @@ class UserControllerTest {
                 }
                 """;
 
-        mvc.perform(post("/auth/login")
+        mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isOk())
@@ -78,7 +78,7 @@ class UserControllerTest {
     void 로그아웃() throws Exception {
         String sessionId = "sessionId";
 
-        mvc.perform(post("/auth/logout")
+        mockMvc.perform(post("/auth/logout")
                         .cookie(new Cookie("sessionId", sessionId)))
                 .andExpect(status().isOk())
                 .andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("Max-Age=0")))
@@ -92,7 +92,7 @@ class UserControllerTest {
         String email = "test@example.com";
         String password = "password123";
         String nickName = "test";
-        mvc.perform(post("/auth/signup")
+        mockMvc.perform(post("/auth/signup")
                         .param("email", email)
                         .param("password", password)
                         .param("nickname", nickName))
@@ -106,7 +106,7 @@ class UserControllerTest {
     void 세션확인() throws Exception {
         String sessionId = "sessionId";
         when(userService.getUserBySession(sessionId)).thenReturn(mockUser);
-        mvc.perform(get("/auth/session-user")
+        mockMvc.perform(get("/auth/session-user")
                         .cookie(new Cookie("sessionId", sessionId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.sessionId").value(sessionId))
@@ -126,7 +126,7 @@ class UserControllerTest {
         System.out.println(mockUser.getId());
         mockUser.setNickname(nickname);
         when(userService.updateNickName(mockUser.getId(), nickname, null)).thenReturn(mockUser);
-        mvc.perform(put("/auth/update/nickname")
+        mockMvc.perform(put("/auth/update/nickname")
                         .param("nickName", nickname)
                         .cookie(new Cookie("sessionId", sessionId)))
                 .andExpect(status().isNoContent())
@@ -145,7 +145,7 @@ class UserControllerTest {
                 }
                 """;
         when(userService.getUserBySession(sessionId)).thenReturn(mockUser);
-        mvc.perform(put("/auth/update/password")
+        mockMvc.perform(put("/auth/update/password")
                         .cookie(new Cookie("sessionId", sessionId))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -160,7 +160,7 @@ class UserControllerTest {
     void 회원탈퇴() throws Exception {
         String sessionId = "sessionId";
         when(userService.getUserBySession(sessionId)).thenReturn(mockUser);
-        mvc.perform(delete("/auth/resign")
+        mockMvc.perform(delete("/auth/resign")
                         .cookie(new Cookie("sessionId", sessionId)))
                 .andExpect(status().isNoContent())
                 .andExpect(jsonPath("$.message").value("탈퇴 성공"));
