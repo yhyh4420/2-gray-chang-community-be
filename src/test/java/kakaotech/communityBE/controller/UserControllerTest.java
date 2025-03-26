@@ -44,7 +44,7 @@ class UserControllerTest {
     }
 
     @Test
-    void login_shouldReturnSuccessWithCookie() throws Exception {
+    void 로그인() throws Exception {
         String email = "test@example.com";
         String password = "password123";
         String sessionId = "session-abc";
