@@ -4,6 +4,7 @@ import kakaotech.communityBE.SessionStorage;
 import kakaotech.communityBE.entity.User;
 import kakaotech.communityBE.repository.UserRepository;
 import kakaotech.communityBE.util.FileUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,19 +18,13 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final SessionStorage sessionStorage;
-
-    @Autowired
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, SessionStorage sessionStorage) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.sessionStorage = sessionStorage;
-    }
 
     @Transactional
     public Map<String, Object> login(String email, String password) {
@@ -41,7 +36,7 @@ public class UserService {
         // 비밀번호 검증
         if (!passwordEncoder.matches(password, user.getPassword())) {
             logger.warn("잘못된 비밀번호 입력: 이메일({})", email);
-            throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "비밀번호가 틀렸습니다.");
         }
         logger.info("사용자 로그인 성공: {}", email);
         String sessionId = sessionStorage.createSession(user.getId());

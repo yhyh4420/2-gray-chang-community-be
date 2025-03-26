@@ -1,0 +1,46 @@
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 10  # 최대 10개의 커넥션 허용
+      minimum-idle: 5        # 최소 유휴 커넥션 5개 유지
+      idle-timeout: 30000    # 유휴 커넥션 30초 후 닫기
+      connection-timeout: 30000  # 30초 동안 커넥션이 없으면 타임아웃
+      max-lifetime: 1800000  # 30분 후 커넥션 재생성
+    url: jdbc:mysql://localhost:3306/test_db?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: test_user
+    password: test_password
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        generate_statistics: true
+  sql:
+    init:
+      mode: never
+  data:
+    redis:
+      host: localhost
+      port: 6380
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: 5000ms
+      database: 1
+  session:
+    store-type: redis
+    timeout: 1800s
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false  # HTTP 환경에서는 false, HTTPS에서는 true
+        http-only: true
+        same-site: None
