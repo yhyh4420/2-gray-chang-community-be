@@ -6,7 +6,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -22,24 +21,43 @@ class FileUtilTest {
     private MultipartFile imageFile;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         imageFile = mock(MultipartFile.class);
 
-        // 테스트 디렉토리 보장
+        // 실제 디렉토리 생성
         new File(PROFILE_DIR).mkdirs();
         new File(POST_DIR).mkdirs();
+
+        // 모든 테스트에서 공통으로 사용하는 기본 mock 동작
+        when(imageFile.isEmpty()).thenReturn(false);
+        when(imageFile.getOriginalFilename()).thenReturn("test.jpg");
+
+        // 핵심: transferTo() 가 실제 파일 저장하지 않도록 mock 처리
+        doAnswer(invocation -> {
+            File targetFile = invocation.getArgument(0);
+            targetFile.createNewFile(); // 실제 파일을 만든 척
+            return null;
+        }).when(imageFile).transferTo(any(File.class));
     }
 
     @Test
     void 프로필이미지_저장_성공() throws IOException {
-        when(imageFile.isEmpty()).thenReturn(false);
-        when(imageFile.getOriginalFilename()).thenReturn("test.jpg");
-
         String savedPath = FileUtil.saveProfileImage(imageFile);
 
         assertThat(savedPath).isNotNull();
         assertThat(savedPath).contains("/uploads/profile/");
         assertThat(savedPath).contains("test.jpg");
+    }
+
+    @Test
+    void 게시글이미지_저장_성공() throws IOException {
+        when(imageFile.getOriginalFilename()).thenReturn("post.jpg");
+
+        String savedPath = FileUtil.savePostImage(imageFile);
+
+        assertThat(savedPath).isNotNull();
+        assertThat(savedPath).contains("/uploads/postImage/");
+        assertThat(savedPath).contains("post.jpg");
     }
 
     @Test
@@ -49,18 +67,6 @@ class FileUtilTest {
         String savedPath = FileUtil.saveProfileImage(imageFile);
 
         assertThat(savedPath).isNull();
-    }
-
-    @Test
-    void 게시글이미지_저장_성공() throws IOException {
-        when(imageFile.isEmpty()).thenReturn(false);
-        when(imageFile.getOriginalFilename()).thenReturn("post.jpg");
-
-        String savedPath = FileUtil.savePostImage(imageFile);
-
-        assertThat(savedPath).isNotNull();
-        assertThat(savedPath).contains("/uploads/postImage/");
-        assertThat(savedPath).contains("post.jpg");
     }
 
     @Test
@@ -83,7 +89,6 @@ class FileUtilTest {
         boolean isDeleted = FileUtil.deleteFile(DEFAULT_PROFILE);
         assertThat(isDeleted).isFalse();
     }
-
 
     @Test
     void 기본프로필_경로반환() {
