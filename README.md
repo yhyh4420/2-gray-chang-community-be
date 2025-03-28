@@ -1,6 +1,7 @@
 ## 나만의 커뮤니티를 만들자
 
 --------
+![Uploading GIFMaker_me.gif…]()
 
 --------
 
