@@ -1,6 +1,7 @@
 ## 나만의 커뮤니티를 만들자
 
 --------
+<img src="![Image](https://github.com/user-attachments/assets/ef2b1a38-d094-47d8-b121-bc8ed3ea7941)">
 --------
 
 ## 📁프로젝트 구조
