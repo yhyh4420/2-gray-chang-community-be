@@ -1,5 +1,7 @@
 ## 나만의 커뮤니티를 만들자
 
+![GIFMaker_me](https://github.com/user-attachments/assets/e67887cb-7dc8-416d-b5ad-62eb4ceb91e3)
+
 ## 📁프로젝트 구조
 
 ```
