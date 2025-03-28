@@ -1,9 +1,5 @@
 ## 나만의 커뮤니티를 만들자
 
---------
-
---------
-
 ## 📁프로젝트 구조
 
 ```
@@ -32,6 +28,8 @@ uploads
 ├── profile                         // 업로드된 프로필 이미지 저장소(기본이미지, 탈퇴이미지 포함)
 └── postImage                       // 업로드된 게시물 이미지 저장소
 ```
+
+🌼FE 링크 : https://github.com/yhyh4420/2-gray-chang-community
 
 ---
 
@@ -103,3 +101,4 @@ uploads
 | **기타**     | MultipartFile, File I/O, REST API                  |
 
 ---
+트러블슈팅 및 고도화, 회고 : [링크](retrospect.md)
