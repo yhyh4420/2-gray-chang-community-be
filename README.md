@@ -1,5 +1,11 @@
 ## 나만의 커뮤니티를 만들자
 
+-------
+
+![Image](https://github.com/user-attachments/assets/b113fe7c-a7bd-4701-97a2-82c1ada4f1fe)
+
+-------
+
 ## 📁프로젝트 구조
 
 ```
