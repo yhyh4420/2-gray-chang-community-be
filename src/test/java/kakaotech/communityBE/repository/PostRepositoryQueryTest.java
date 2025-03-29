@@ -3,11 +3,8 @@ package kakaotech.communityBE.repository;
 import jakarta.persistence.EntityManager;
 import kakaotech.communityBE.entity.Comment;
 import kakaotech.communityBE.entity.Posts;
-import kakaotech.communityBE.entity.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -22,14 +19,13 @@ import java.util.Random;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class PostRepositoryQueryTest {
 
+    private final StopWatch stopWatch = new StopWatch();
+    private final Random random = new Random();
     @Autowired
     private PostRepository postRepository;
     @Autowired
     private EntityManager em;
-
     private Long postId;
-    private final StopWatch stopWatch = new StopWatch();
-    private final Random random = new Random();
 
     @BeforeEach
     void setUp() {
@@ -76,17 +72,17 @@ class PostRepositoryQueryTest {
     ----------------------------------------------------------------
     Seconds       %       발행 쿼리 개수       Task name
     ----------------------------------------------------------------
-    0.037745709   74%     1+5              일반 findAll
-    0.010377709   20%     1                entityGraph findAll
-    0.002919583   06%     1                fetch join findAll
+    0.013455125   39%     1+5              일반 findAll
+    0.014127458   41%     1                entityGraph findAll
+    0.006825167   20%     1                fetch join findAll
 
     fetch join으로 post별 comment를 찾는 쿼리 수정 결과
     1. 쿼리 발행 숫자가 5+1에서 1개로 감소했다(N+1문제 해결)
-    2. 일반 findAll보다 fetch join의 속도가 1,133% 향상되었다.
+    2. 일반 findAll보다 fetch join의 속도가 95% 향상되었다.
      */
 
     @Test
-    void findById_성능비교(){
+    void findById_성능비교() {
         System.out.println("----------------------");
         // n+1 문제 발생
         em.clear();
