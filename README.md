@@ -101,4 +101,4 @@ uploads
 | **기타**     | MultipartFile, File I/O, REST API                  |
 
 ---
-트러블슈팅 및 고도화, 회고 : [링크](retrospect.md)
+트러블슈팅 및 고도화 연구, 회고 : [링크](retrospect.md)
