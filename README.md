@@ -1,5 +1,11 @@
 ## 나만의 커뮤니티를 만들자
 
+-------
+
+![Image](https://github.com/user-attachments/assets/b113fe7c-a7bd-4701-97a2-82c1ada4f1fe)
+
+-------
+
 ## 📁프로젝트 구조
 
 ```
@@ -101,4 +107,4 @@ uploads
 | **기타**     | MultipartFile, File I/O, REST API                  |
 
 ---
-트러블슈팅 및 고도화, 회고 : [링크](retrospect.md)
+트러블슈팅 및 고도화 연구, 회고 : [링크](retrospect.md)
