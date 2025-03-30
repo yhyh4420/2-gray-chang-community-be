@@ -1,0 +1,130 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Posts</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kakaotech.communityBE.entity</a>
+</div>
+
+<h1>Coverage Summary for Class: Posts (kakaotech.communityBE.entity)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">Posts$HibernateInstantiator$wVa2ODVa</td>
+  </tr>
+  <tr>
+    <td class="name">Posts$HibernateInstantiator$xmnGgZzR</td>
+  </tr>
+  <tr>
+    <td class="name">Posts$HibernateProxy$92vh1YaN</td>
+  </tr>
+  <tr>
+    <td class="name">Posts$HibernateProxy$ZDka03u9</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kakaotech.communityBE.entity;
+&nbsp;
+&nbsp;import jakarta.persistence.*;
+&nbsp;import lombok.Getter;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;import lombok.Setter;
+&nbsp;import org.hibernate.annotations.CreationTimestamp;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Entity
+&nbsp;@Getter
+&nbsp;@Setter
+&nbsp;@NoArgsConstructor
+&nbsp;@Table(name = &quot;posts&quot;)
+&nbsp;public class Posts {
+&nbsp;
+&nbsp;    @Id
+&nbsp;    @GeneratedValue(strategy = GenerationType.IDENTITY)
+&nbsp;    private Long id;
+&nbsp;
+&nbsp;    @ManyToOne(fetch = FetchType.LAZY)
+&nbsp;    @JoinColumn(name = &quot;user_Id&quot;, nullable = false)
+&nbsp;    private User user;
+&nbsp;
+&nbsp;    @OneToMany(mappedBy = &quot;posts&quot;, cascade = CascadeType.ALL, orphanRemoval = true)
+&nbsp;    private List&lt;Comment&gt; comments = new ArrayList&lt;&gt;();
+&nbsp;
+&nbsp;    @Column(nullable = false)
+&nbsp;    private String title;
+&nbsp;
+&nbsp;    @Lob
+&nbsp;    @Column(nullable = false)
+&nbsp;    private String content;
+&nbsp;
+&nbsp;    @Column
+&nbsp;    private String image;
+&nbsp;
+&nbsp;    @Column
+&nbsp;    private int likes = 0;
+&nbsp;
+&nbsp;    @Column
+&nbsp;    private int views = 0;
+&nbsp;
+&nbsp;    @CreationTimestamp
+&nbsp;    @Column(updatable = false, nullable = false)
+&nbsp;    private LocalDateTime postDate;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-03-30 19:29</div>
+</div>
+</body>
+</html>

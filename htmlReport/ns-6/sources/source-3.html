@@ -1,0 +1,295 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UserService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kakaotech.communityBE.service</a>
+</div>
+
+<h1>Coverage Summary for Class: UserService (kakaotech.communityBE.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserService</td>
+<td class="coverageStat">
+  <span class="percent">
+    81.8%
+  </span>
+  <span class="absValue">
+    (9/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (15/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86.1%
+  </span>
+  <span class="absValue">
+    (62/72)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">UserService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    81.8%
+  </span>
+  <span class="absValue">
+    (9/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    75%
+  </span>
+  <span class="absValue">
+    (15/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    86.1%
+  </span>
+  <span class="absValue">
+    (62/72)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kakaotech.communityBE.service;
+&nbsp;
+&nbsp;import kakaotech.communityBE.SessionStorage;
+&nbsp;import kakaotech.communityBE.entity.User;
+&nbsp;import kakaotech.communityBE.repository.UserRepository;
+&nbsp;import kakaotech.communityBE.util.FileUtil;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;import org.springframework.web.server.ResponseStatusException;
+&nbsp;
+&nbsp;import java.util.*;
+&nbsp;
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class UserService {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(UserService.class);</b>
+&nbsp;    private final UserRepository userRepository;
+&nbsp;    private final BCryptPasswordEncoder passwordEncoder;
+&nbsp;    private final SessionStorage sessionStorage;
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public Map&lt;String, Object&gt; login(String email, String password) {
+&nbsp;        // 사용자 존재 여부 확인
+<b class="fc">&nbsp;        User user = userRepository.findByEmail(email).orElseThrow(() -&gt; {</b>
+<b class="fc">&nbsp;            logger.warn(&quot;등록되지 않은 이메일: {}&quot;, email);</b>
+<b class="fc">&nbsp;            return new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;등록되지 않은 이메일입니다.&quot;);</b>
+&nbsp;        });
+&nbsp;        // 비밀번호 검증
+<b class="fc">&nbsp;        if (!passwordEncoder.matches(password, user.getPassword())) {</b>
+<b class="fc">&nbsp;            logger.warn(&quot;잘못된 비밀번호 입력: 이메일({})&quot;, email);</b>
+<b class="fc">&nbsp;            throw new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;비밀번호가 틀렸습니다.&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        logger.info(&quot;사용자 로그인 성공: {}&quot;, email);</b>
+<b class="fc">&nbsp;        String sessionId = sessionStorage.createSession(user.getId());</b>
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; result = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;        result.put(&quot;user&quot;, user);</b>
+<b class="fc">&nbsp;        result.put(&quot;sessionId&quot;, sessionId);</b>
+<b class="fc">&nbsp;        return result;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void logout(String sessionId) {
+<b class="nc">&nbsp;        if (sessionId != null) {</b>
+<b class="nc">&nbsp;            sessionStorage.removeSession(sessionId);</b>
+<b class="nc">&nbsp;            logger.info(&quot;로그아웃 - 세션 ID 제거: {}&quot;, sessionId);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void signUp(String email, String password, String nickname, MultipartFile imageFile) {
+&nbsp;        //일단 중복되는지 확인
+<b class="fc">&nbsp;        if (userRepository.findByEmail(email).isPresent()) {</b>
+<b class="fc">&nbsp;            logger.warn(&quot;이미 사용중인 이메일입니다.&quot;);</b>
+<b class="fc">&nbsp;            throw new ResponseStatusException(HttpStatus.CONFLICT, &quot;중복되는 이메일입니다.&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        if (userRepository.findByNickname(nickname).isPresent()) {</b>
+<b class="fc">&nbsp;            throw new ResponseStatusException(HttpStatus.CONFLICT, &quot;중복되는 닉네임입니다.&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        String profileImagePath = FileUtil.getDefaultProfileImage();</b>
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            String uploadedImagePath = FileUtil.saveProfileImage(imageFile);</b>
+<b class="pc">&nbsp;            if (uploadedImagePath != null) {</b>
+<b class="nc">&nbsp;                profileImagePath = uploadedImagePath;</b>
+<b class="nc">&nbsp;                logger.info(&quot;실제 저장된 프로필 이미지 이름 : {}&quot;, profileImagePath);</b>
+&nbsp;            }
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            logger.error(&quot;프로필 이미지 저장 실패: {}&quot;, e.getMessage());</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        User newUser = new User();</b>
+<b class="fc">&nbsp;        newUser.setNickname(nickname);</b>
+<b class="fc">&nbsp;        newUser.setPassword(passwordEncoder.encode(password));</b>
+<b class="fc">&nbsp;        newUser.setEmail(email);</b>
+<b class="fc">&nbsp;        newUser.setProfileImage(profileImagePath);</b>
+<b class="fc">&nbsp;        userRepository.save(newUser);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    public User findById(Long userId) {
+<b class="fc">&nbsp;        return userRepository.findById(userId)</b>
+<b class="fc">&nbsp;                .orElseThrow(()-&gt;{</b>
+<b class="nc">&nbsp;                    logger.warn(&quot;유저 없음, userId : {}&quot;, userId);</b>
+<b class="nc">&nbsp;                    return new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;유저를 찾을 수 없습니다.&quot;);</b>
+&nbsp;                });
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public User updateNickName(Long userId, String nickname, MultipartFile imageFile) {
+<b class="fc">&nbsp;        User user = findById(userId);</b>
+&nbsp;
+<b class="fc">&nbsp;        FileUtil.deleteFile(user.getProfileImage());</b>
+<b class="fc">&nbsp;        String imagePath = FileUtil.getDefaultProfileImage();</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            String uploadedImage = FileUtil.saveProfileImage(imageFile);</b>
+<b class="pc">&nbsp;            if (uploadedImage != null) {</b>
+<b class="nc">&nbsp;                imagePath = uploadedImage;</b>
+&nbsp;            }
+&nbsp;        } catch (Exception e) {
+<b class="nc">&nbsp;            logger.error(&quot;프로필 수정이미지 저장 실패: {}&quot;, e.getMessage());</b>
+&nbsp;        }
+<b class="fc">&nbsp;        user.setNickname(nickname);</b>
+<b class="fc">&nbsp;        user.setProfileImage(imagePath);</b>
+<b class="fc">&nbsp;        return user;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void updatePassword(Long userId, String newPassword) {
+<b class="fc">&nbsp;        User user = findById(userId);</b>
+<b class="fc">&nbsp;        user.setPassword(passwordEncoder.encode(newPassword));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void deleteUser(Long userId) {
+<b class="fc">&nbsp;        User user = findById(userId);</b>
+&nbsp;        //기존 프로필사진 삭제
+<b class="fc">&nbsp;        FileUtil.deleteFile(user.getProfileImage());</b>
+&nbsp;        String deleteNickname;
+&nbsp;        do{
+<b class="fc">&nbsp;            deleteNickname = &quot;탈퇴유저_&quot; + UUID.randomUUID().toString().replaceAll(&quot;-&quot;, &quot;&quot;).substring(0, 5);</b>
+<b class="pc">&nbsp;        } while (userRepository.findByNickname(deleteNickname).isPresent());</b>
+<b class="fc">&nbsp;        user.setNickname(deleteNickname);</b>
+<b class="fc">&nbsp;        user.setProfileImage(FileUtil.getResignProfileImage());</b>
+<b class="fc">&nbsp;        user.setResigned(true);</b>
+<b class="fc">&nbsp;        user.setEmail(&quot;deleted&quot; + UUID.randomUUID().toString().substring(0, 35)); // 이러면 혹시모를 중복가입 안되겠지..?</b>
+<b class="fc">&nbsp;        user.setPassword(passwordEncoder.encode(userId + UUID.randomUUID().toString().substring(0, 10))); // 이러면 비밀번호 추론 불가</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public User getUserBySession(String sessionId) {
+<b class="fc">&nbsp;        if (sessionId == null) {</b>
+<b class="fc">&nbsp;            logger.warn(&quot;세션 없음!&quot;); // 세션이 존재하는지 확인</b>
+<b class="fc">&nbsp;            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, &quot;세션이 없습니다&quot;);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            logger.info(&quot;세션 있음 : {}&quot;, sessionId);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        if (!sessionStorage.isValidSession(sessionId)) {</b>
+<b class="fc">&nbsp;            logger.warn(&quot;유효하지 않은 세션ID: {}&quot;, sessionId);</b>
+<b class="fc">&nbsp;            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, &quot;유효하지 않은 세션&quot;);</b>
+&nbsp;        } else {
+<b class="fc">&nbsp;            logger.info(&quot;유효한 세션 : {}&quot;, sessionId);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Long userId = sessionStorage.getUserId(sessionId);</b>
+<b class="fc">&nbsp;        if (userId == null) {</b>
+<b class="fc">&nbsp;            logger.warn(&quot;세션은 유효한데 userId 없음, sessionId: {}&quot;, sessionId);</b>
+<b class="fc">&nbsp;            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, &quot;세션에 매치되는 유저아이디가 없음&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        logger.info(&quot;세션 유지중 - userId : {}&quot;, userId);</b>
+<b class="fc">&nbsp;        return findById(userId);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-03-30 19:29</div>
+</div>
+</body>
+</html>

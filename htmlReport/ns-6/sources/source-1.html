@@ -1,0 +1,237 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > CommentService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kakaotech.communityBE.service</a>
+</div>
+
+<h1>Coverage Summary for Class: CommentService (kakaotech.communityBE.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CommentService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (39/39)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">CommentService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (39/39)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kakaotech.communityBE.service;
+&nbsp;
+&nbsp;import kakaotech.communityBE.dto.CommentDto;
+&nbsp;import kakaotech.communityBE.dto.PostsDto;
+&nbsp;import kakaotech.communityBE.entity.Comment;
+&nbsp;import kakaotech.communityBE.entity.Posts;
+&nbsp;import kakaotech.communityBE.entity.User;
+&nbsp;import kakaotech.communityBE.repository.CommentRepository;
+&nbsp;import kakaotech.communityBE.repository.PostRepository;
+&nbsp;import kakaotech.communityBE.repository.UserRepository;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import org.springframework.web.server.ResponseStatusException;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.List;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class CommentService {
+&nbsp;
+&nbsp;    private final Logger logger = LoggerFactory.getLogger(CommentService.class);
+&nbsp;
+&nbsp;    private final CommentRepository commentRepository;
+&nbsp;    private final UserRepository userRepository;
+&nbsp;    private final PostRepository postRepository;
+&nbsp;
+&nbsp;    private User getUser(Long userId) {
+<b class="fc">&nbsp;        User user = userRepository.findById(userId)</b>
+<b class="fc">&nbsp;                .orElseThrow(()-&gt; {</b>
+<b class="fc">&nbsp;                    logger.warn(&quot;유저 없음 : {}&quot;, userId);</b>
+<b class="fc">&nbsp;                    return new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;유저 정보를 찾을 수 없습니다. 로그인 정보를 확인하세요&quot;);</b>
+&nbsp;                });
+<b class="fc">&nbsp;        return user;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Posts getPost(Long postId) {
+<b class="fc">&nbsp;        Posts post = postRepository.findById(postId)</b>
+<b class="fc">&nbsp;                .orElseThrow(()-&gt;{</b>
+<b class="fc">&nbsp;                    logger.warn(&quot;게시글 없음 : {}&quot;, postId);</b>
+<b class="fc">&nbsp;                    return new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;게시글을 찾을 수 없습니다.&quot;);</b>
+&nbsp;                });
+<b class="fc">&nbsp;        return post;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public CommentDto createComment(Long userId, Long postId, String content) {
+<b class="fc">&nbsp;        User user = getUser(userId);</b>
+<b class="fc">&nbsp;        Posts post = getPost(postId);</b>
+<b class="fc">&nbsp;        Comment comment = new Comment();</b>
+<b class="fc">&nbsp;        comment.setUser(user);</b>
+<b class="fc">&nbsp;        comment.setPosts(post);</b>
+<b class="fc">&nbsp;        comment.setComment(content);</b>
+<b class="fc">&nbsp;        commentRepository.save(comment);</b>
+<b class="fc">&nbsp;        return new CommentDto(comment);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public List&lt;CommentDto&gt; getAllComments(Long postId) {
+<b class="fc">&nbsp;        Posts post = getPost(postId);</b>
+<b class="fc">&nbsp;        List&lt;Comment&gt; comments = commentRepository.findAllByPostsFetch(post);</b>
+<b class="fc">&nbsp;        List&lt;CommentDto&gt; commentDtos = comments.stream()</b>
+<b class="fc">&nbsp;                .map(CommentDto::new)</b>
+<b class="fc">&nbsp;                .toList();</b>
+<b class="fc">&nbsp;        return commentDtos;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Comment getCommentbyId(Long commentId){
+<b class="fc">&nbsp;        Comment comment = commentRepository.findById(commentId).orElseThrow(()-&gt;{</b>
+<b class="fc">&nbsp;            logger.warn(&quot;comment id 조회 안됨 : {}&quot;, commentId);</b>
+<b class="fc">&nbsp;            return new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;댓글을 찾을 수 없습니다&quot;);</b>
+&nbsp;        });
+<b class="fc">&nbsp;        return comment;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public CommentDto updateComment(Long userId, Long commentId, String content) {
+<b class="fc">&nbsp;        Comment comment = getCommentbyId(commentId);</b>
+<b class="fc">&nbsp;        if (!comment.getUser().getId().equals(userId)) {</b>
+<b class="fc">&nbsp;            logger.warn(&quot;작성자 아님&quot;);</b>
+<b class="fc">&nbsp;            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, &quot;작성자만 게시글을 수정할 수 있습니다&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        comment.setComment(content);</b>
+<b class="fc">&nbsp;        return new CommentDto(comment);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void deleteComment(Long userId, Long commentId) {
+<b class="fc">&nbsp;        Comment comment = getCommentbyId(commentId);</b>
+<b class="fc">&nbsp;        if (!comment.getUser().getId().equals(userId)) {</b>
+<b class="fc">&nbsp;            logger.warn(&quot;작성자 아님. 작성자 : {}, 요청자 : {}&quot;, comment.getUser().getId(), userId);</b>
+<b class="fc">&nbsp;            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, &quot;작성자만 댓글을 삭제할 수 있습니다.&quot;);</b>
+&nbsp;        }else {
+<b class="fc">&nbsp;            commentRepository.delete(comment);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-03-30 19:29</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,189 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PostController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kakaotech.communityBE.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: PostController (kakaotech.communityBE.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PostController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (19/19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kakaotech.communityBE.controller;
+&nbsp;
+&nbsp;import kakaotech.communityBE.dto.LikeResponseDto;
+&nbsp;import kakaotech.communityBE.dto.MessageResponseDto;
+&nbsp;import kakaotech.communityBE.dto.PostsDto;
+&nbsp;import kakaotech.communityBE.dto.PostsResponseDto;
+&nbsp;import kakaotech.communityBE.service.PostService;
+&nbsp;import kakaotech.communityBE.service.UserService;
+&nbsp;import kakaotech.communityBE.util.ResponseUtil;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/posts&quot;)
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class PostController {
+&nbsp;
+&nbsp;    Logger logger = LoggerFactory.getLogger(PostController.class);
+&nbsp;
+&nbsp;    private final PostService postService;
+&nbsp;    private final UserService userService;
+&nbsp;
+&nbsp;    @GetMapping
+&nbsp;    public ResponseEntity&lt;List&lt;PostsDto&gt;&gt; getAllPost() {
+<b class="fc">&nbsp;        List&lt;PostsDto&gt; postsDtoList = postService.getAllPosts();</b>
+<b class="fc">&nbsp;        return ResponseUtil.ok(postsDtoList);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/{postId}&quot;)
+&nbsp;    public ResponseEntity&lt;PostsResponseDto&gt; getPost(@PathVariable Long postId) {
+<b class="fc">&nbsp;        PostsDto postsDto = postService.getPost(postId);</b>
+<b class="fc">&nbsp;        return ResponseUtil.ok(new PostsResponseDto(&quot;ok&quot;, postsDto));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping
+&nbsp;    public ResponseEntity&lt;MessageResponseDto&gt; createPost(
+&nbsp;            @RequestParam(&quot;title&quot;) String title,
+&nbsp;            @RequestParam(&quot;content&quot;) String content,
+&nbsp;            @RequestParam(value = &quot;image&quot;, required = false) MultipartFile image,
+&nbsp;            @CookieValue(value = &quot;sessionId&quot;, required = false) String sessionId) {
+<b class="fc">&nbsp;        Long userId = userService.getUserBySession(sessionId).getId();</b>
+<b class="fc">&nbsp;        logger.info(&quot;현재 유저 아이디 : {}, 세션 아이디 : {}&quot;, userId, sessionId);</b>
+<b class="fc">&nbsp;        logger.info(&quot;받은 값 : {}, {}, {}&quot;, title, content, image);</b>
+<b class="fc">&nbsp;        postService.createPost(userId, title, content, image);</b>
+<b class="fc">&nbsp;        return ResponseUtil.created(&quot;ok&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PutMapping(&quot;/{postId}&quot;)
+&nbsp;    public ResponseEntity&lt;MessageResponseDto&gt; updatePost(
+&nbsp;            @PathVariable Long postId,
+&nbsp;            @RequestParam(&quot;title&quot;) String title,
+&nbsp;            @RequestParam(&quot;content&quot;) String content,
+&nbsp;            @RequestParam(value = &quot;image&quot;, required = false) MultipartFile image,
+&nbsp;            @CookieValue(value=&quot;sessionId&quot;, required = false) String sessionId) {
+<b class="fc">&nbsp;        Long userId = userService.getUserBySession(sessionId).getId();</b>
+<b class="fc">&nbsp;        postService.updatePost(postId, userId, title, content, image);</b>
+<b class="fc">&nbsp;        return ResponseUtil.noContent(&quot;수정 완료&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @DeleteMapping(&quot;/{postId}&quot;)
+&nbsp;    public ResponseEntity&lt;MessageResponseDto&gt; deletePost(
+&nbsp;            @PathVariable Long postId,
+&nbsp;            @CookieValue(value=&quot;sessionId&quot;, required = false) String sessionId) {
+<b class="fc">&nbsp;        Long userId = userService.getUserBySession(sessionId).getId();</b>
+<b class="fc">&nbsp;        postService.deletePost(userId, postId);</b>
+<b class="fc">&nbsp;        return ResponseUtil.noContent(&quot;삭제 완료!&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PutMapping(&quot;/{postId}/likes&quot;)
+&nbsp;    public ResponseEntity&lt;LikeResponseDto&gt; likePost(
+&nbsp;            @PathVariable Long postId,
+&nbsp;            @CookieValue(value = &quot;sessionId&quot;, required = false) String sessionId) {
+<b class="fc">&nbsp;        Long userId = userService.getUserBySession(sessionId).getId();</b>
+<b class="fc">&nbsp;        logger.info(&quot;sessionId : {}, userId : {}, postId : {}&quot;,sessionId, userId, postId);</b>
+<b class="fc">&nbsp;        int likes = postService.increaseLikePost(postId, userId);</b>
+<b class="fc">&nbsp;        return ResponseUtil.ok(new LikeResponseDto(&quot;좋아요 완료&quot;, likes));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-03-30 19:29</div>
+</div>
+</body>
+</html>
