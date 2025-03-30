@@ -1,0 +1,108 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PostRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kakaotech.communityBE.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: PostRepository (kakaotech.communityBE.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">PostRepository$MockitoMock$z7jiKvMt</td>
+  </tr>
+  <tr>
+    <td class="name">PostRepository$MockitoMock$z7jiKvMt$auxiliary$egTBWiBY</td>
+  </tr>
+  <tr>
+    <td class="name">PostRepository$MockitoMock$z7jiKvMt$auxiliary$HFSS7fUw</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kakaotech.communityBE.repository;
+&nbsp;
+&nbsp;import kakaotech.communityBE.entity.Posts;
+&nbsp;import org.springframework.data.jpa.repository.EntityGraph;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.data.jpa.repository.Modifying;
+&nbsp;import org.springframework.data.jpa.repository.Query;
+&nbsp;import org.springframework.data.repository.query.Param;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;
+&nbsp;@Repository
+&nbsp;public interface PostRepository extends JpaRepository&lt;Posts, Long&gt; {
+&nbsp;
+&nbsp;    @Modifying
+&nbsp;    @Query(&quot;update Posts p set p.likes = p.likes+1 where p.id = :postId&quot;)
+&nbsp;    int increaseLikes(@Param(&quot;postId&quot;) Long postId);
+&nbsp;
+&nbsp;    @Query(&quot;select p from Posts p left join fetch p.comments&quot;)
+&nbsp;    List&lt;Posts&gt; findAllFetch();
+&nbsp;
+&nbsp;    @EntityGraph(attributePaths = {&quot;comments&quot;})
+&nbsp;    @Query(&quot;select p from Posts p&quot;)
+&nbsp;    List&lt;Posts&gt; findAllEntityGraph();
+&nbsp;
+&nbsp;    @Query(&quot;select distinct p from Posts p left join fetch p.comments where p.id = :postId&quot;)
+&nbsp;    Optional&lt;Posts&gt; findbyIdFetch(@Param(&quot;postId&quot;) Long postId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-03-30 19:29</div>
+</div>
+</body>
+</html>

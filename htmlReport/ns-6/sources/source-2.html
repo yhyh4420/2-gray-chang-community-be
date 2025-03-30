@@ -1,0 +1,282 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > PostService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kakaotech.communityBE.service</a>
+</div>
+
+<h1>Coverage Summary for Class: PostService (kakaotech.communityBE.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">PostService</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91.7%
+  </span>
+  <span class="absValue">
+    (11/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (63/63)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">PostService$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91.7%
+  </span>
+  <span class="absValue">
+    (11/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (63/63)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kakaotech.communityBE.service;
+&nbsp;
+&nbsp;import kakaotech.communityBE.dto.PostsDto;
+&nbsp;import kakaotech.communityBE.entity.Like;
+&nbsp;import kakaotech.communityBE.entity.Posts;
+&nbsp;import kakaotech.communityBE.entity.User;
+&nbsp;import kakaotech.communityBE.repository.LikeRepository;
+&nbsp;import kakaotech.communityBE.repository.PostRepository;
+&nbsp;import kakaotech.communityBE.repository.UserRepository;
+&nbsp;import kakaotech.communityBE.util.FileUtil;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;import org.springframework.transaction.annotation.Transactional;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;import org.springframework.web.server.ResponseStatusException;
+&nbsp;
+&nbsp;import java.io.File;
+&nbsp;import java.io.IOException;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;import java.util.UUID;
+&nbsp;
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class PostService {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(PostService.class);</b>
+&nbsp;    private final UserRepository userRepository;
+&nbsp;    private final PostRepository postRepository;
+&nbsp;    private final LikeRepository likeRepository;
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void createPost(Long userId, String title, String content, MultipartFile imageFile){
+<b class="fc">&nbsp;        User user = getUser(userId);</b>
+<b class="fc">&nbsp;        Posts posts = new Posts();</b>
+&nbsp;
+<b class="fc">&nbsp;        String imagePath = null;</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            String uploadedImage = FileUtil.savePostImage(imageFile);</b>
+<b class="fc">&nbsp;            if (uploadedImage != null) {</b>
+<b class="fc">&nbsp;                imagePath = uploadedImage;</b>
+&nbsp;            }
+&nbsp;        } catch (Exception e) {
+<b class="fc">&nbsp;            logger.error(&quot;이미지 저장 실패: {}&quot;, e.getMessage());</b>
+<b class="fc">&nbsp;            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, &quot;이미지 업로드 실패&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        posts.setUser(user);</b>
+<b class="fc">&nbsp;        posts.setTitle(title);</b>
+<b class="fc">&nbsp;        posts.setContent(content);</b>
+<b class="fc">&nbsp;        posts.setImage(imagePath);</b>
+<b class="fc">&nbsp;        posts.setLikes(0);</b>
+<b class="fc">&nbsp;        posts.setViews(0);</b>
+&nbsp;
+<b class="fc">&nbsp;        postRepository.save(posts);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private User getUser(Long userId) {
+<b class="fc">&nbsp;        User user = userRepository.findById(userId)</b>
+<b class="fc">&nbsp;                .orElseThrow(()-&gt; {</b>
+<b class="fc">&nbsp;                    logger.warn(&quot;유저 없음 : {}&quot;, userId);</b>
+<b class="fc">&nbsp;                    return new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;유저 정보를 찾을 수 없습니다. 로그인 정보를 확인하세요&quot;);</b>
+&nbsp;                });
+<b class="fc">&nbsp;        return user;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional(readOnly = true)
+&nbsp;    public List&lt;PostsDto&gt; getAllPosts() {
+<b class="fc">&nbsp;        List&lt;Posts&gt; posts = postRepository.findAllFetch();</b>
+<b class="fc">&nbsp;        List&lt;PostsDto&gt; postsDtos = posts.stream()</b>
+<b class="fc">&nbsp;                .map(PostsDto::new)</b>
+<b class="fc">&nbsp;                .toList();</b>
+<b class="fc">&nbsp;        return postsDtos;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public PostsDto getPost(Long postId) {
+<b class="fc">&nbsp;        Posts posts = getPostsbyId(postId);</b>
+<b class="fc">&nbsp;        posts.setViews(posts.getViews() + 1);// 조회수 오르는거 반영</b>
+<b class="fc">&nbsp;        return new PostsDto(posts);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private Posts getPostsbyId(Long postId) {
+<b class="fc">&nbsp;        Posts posts = postRepository.findById(postId).orElseThrow(()-&gt;{</b>
+<b class="fc">&nbsp;            logger.warn(&quot;postId 조회 안됨 : {}&quot;, postId);</b>
+<b class="fc">&nbsp;            return new ResponseStatusException(HttpStatus.NOT_FOUND, &quot;게시글을 찾을 수 없습니다.&quot;);</b>
+&nbsp;        });
+<b class="fc">&nbsp;        return posts;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void deletePost(Long userId, Long postId) {
+<b class="fc">&nbsp;        Posts posts = getPostsbyId(postId);</b>
+<b class="fc">&nbsp;        if (userId != posts.getUser().getId()) {</b>
+<b class="fc">&nbsp;            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, &quot;게시글 작성자만 글을 지울 수 있습니다.&quot;);</b>
+&nbsp;        } else{
+<b class="fc">&nbsp;            likeRepository.deleteByPost(posts);</b>
+<b class="fc">&nbsp;            postRepository.delete(posts);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public void updatePost(Long postId, Long userId, String title, String content, MultipartFile image) {
+<b class="fc">&nbsp;        Posts posts = getPostsbyId(postId);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (!posts.getUser().getId().equals(userId)) {</b>
+<b class="fc">&nbsp;            logger.warn(&quot;작성자 아님&quot;);</b>
+<b class="fc">&nbsp;            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, &quot;작성자만 게시글을 수정할 수 있습니다.&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        String imagePath = posts.getImage();</b>
+<b class="pc">&nbsp;        if (imagePath != null &amp;&amp; !imagePath.isEmpty()) {</b>
+<b class="fc">&nbsp;            boolean deleted = FileUtil.deleteFile(imagePath);</b>
+<b class="fc">&nbsp;            logger.info(&quot;기존 이미지 삭제 결과: {}&quot;, deleted);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        String newImagePath = null;</b>
+&nbsp;        try {
+<b class="fc">&nbsp;            newImagePath = FileUtil.savePostImage(image);</b>
+&nbsp;        } catch (IOException e) {
+<b class="fc">&nbsp;            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, &quot;이미지 저장 실패&quot;);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        posts.setTitle(title);</b>
+<b class="fc">&nbsp;        posts.setContent(content);</b>
+<b class="fc">&nbsp;        posts.setImage(newImagePath);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @Transactional
+&nbsp;    public int increaseLikePost(Long postId, Long userId) {
+<b class="fc">&nbsp;        logger.info(&quot;userId : {}, postId : {}&quot;, userId, postId);</b>
+<b class="fc">&nbsp;        User user = getUser(userId);</b>
+<b class="fc">&nbsp;        Posts posts = getPostsbyId(postId);</b>
+<b class="fc">&nbsp;        Optional&lt;Like&gt; like = likeRepository.findByUserAndPost(user, posts);</b>
+<b class="fc">&nbsp;        if (like.isPresent()) {</b>
+<b class="fc">&nbsp;            logger.warn(&quot;이미 좋아요함&quot;);</b>
+<b class="fc">&nbsp;            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, &quot;이미 좋아요를 눌렀습니다.&quot;);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        Like newLike = new Like(user, posts);</b>
+<b class="fc">&nbsp;        likeRepository.save(newLike);</b>
+<b class="fc">&nbsp;        postRepository.increaseLikes(postId);</b>
+<b class="fc">&nbsp;        return getPostsbyId(postId).getLikes();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-03-30 19:29</div>
+</div>
+</body>
+</html>

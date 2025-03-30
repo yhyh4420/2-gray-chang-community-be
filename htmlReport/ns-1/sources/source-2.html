@@ -1,0 +1,157 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > SessionStorage</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kakaotech.communityBE</a>
+</div>
+
+<h1>Coverage Summary for Class: SessionStorage (kakaotech.communityBE)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SessionStorage</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kakaotech.communityBE;
+&nbsp;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.springframework.data.redis.core.StringRedisTemplate;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;import java.util.Map;
+&nbsp;import java.util.UUID;
+&nbsp;import java.util.concurrent.ConcurrentHashMap;
+&nbsp;import java.util.concurrent.TimeUnit;
+&nbsp;
+&nbsp;@Component
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class SessionStorage {
+&nbsp;
+&nbsp;    private final StringRedisTemplate redisTemplate;
+&nbsp;    private static final int SESSION_EXPIRY = 60 * 30;
+&nbsp;
+&nbsp;    // 새로운 세션 생성 (로그인 시)
+&nbsp;    public String createSession(Long userId) {
+<b class="nc">&nbsp;        String sessionId = UUID.randomUUID().toString(); // 고유한 세션 ID 생성</b>
+<b class="nc">&nbsp;        redisTemplate.opsForValue().set(sessionId, String.valueOf(userId), SESSION_EXPIRY, TimeUnit.SECONDS);</b>
+<b class="nc">&nbsp;        return sessionId;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // 세션에서 사용자 ID 가져오기
+&nbsp;    public Long getUserId(String sessionId) {
+<b class="nc">&nbsp;        String userId = redisTemplate.opsForValue().get(sessionId);</b>
+<b class="nc">&nbsp;        return (userId != null) ? Long.parseLong(userId) : null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // 세션 삭제 (로그아웃 시)
+&nbsp;    public void removeSession(String sessionId) {
+<b class="nc">&nbsp;        redisTemplate.delete(sessionId);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // 세션 존재 여부 확인
+&nbsp;    public boolean isValidSession(String sessionId) {
+<b class="nc">&nbsp;        return redisTemplate.hasKey(sessionId);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-03-30 19:29</div>
+</div>
+</body>
+</html>

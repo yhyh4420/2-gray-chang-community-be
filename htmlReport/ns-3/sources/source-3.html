@@ -1,0 +1,226 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UserController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kakaotech.communityBE.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: UserController (kakaotech.communityBE.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UserController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (42/42)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kakaotech.communityBE.controller;
+&nbsp;
+&nbsp;import jakarta.servlet.http.HttpServletResponse;
+&nbsp;import kakaotech.communityBE.dto.LoginDto;
+&nbsp;import kakaotech.communityBE.dto.MessageResponseDto;
+&nbsp;import kakaotech.communityBE.dto.SessionResponseDto;
+&nbsp;import kakaotech.communityBE.entity.User;
+&nbsp;import kakaotech.communityBE.service.UserService;
+&nbsp;import kakaotech.communityBE.util.ResponseUtil;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.http.HttpHeaders;
+&nbsp;import org.springframework.http.ResponseCookie;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import org.springframework.web.multipart.MultipartFile;
+&nbsp;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/auth&quot;)
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class UserController {
+&nbsp;
+<b class="fc">&nbsp;    private static final Logger logger = LoggerFactory.getLogger(UserController.class);</b>
+&nbsp;    private final UserService userService;
+&nbsp;
+&nbsp;    @PostMapping(&quot;/login&quot;)
+&nbsp;    public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; login(
+&nbsp;            @RequestBody LoginDto loginDto,
+&nbsp;            HttpServletResponse response) {
+<b class="fc">&nbsp;        Map&lt;String, Object&gt; login = userService.login(loginDto.getEmail(), loginDto.getPassword());</b>
+<b class="fc">&nbsp;        String sessionId = (String) login.get(&quot;sessionId&quot;);</b>
+<b class="fc">&nbsp;        User user = (User) login.get(&quot;user&quot;);</b>
+<b class="fc">&nbsp;        ResponseCookie cookie = ResponseCookie.from(&quot;sessionId&quot;, sessionId)</b>
+<b class="fc">&nbsp;                .path(&quot;/&quot;)</b>
+<b class="fc">&nbsp;                .domain(&quot;localhost&quot;)</b>
+<b class="fc">&nbsp;                .httpOnly(true)</b>
+<b class="fc">&nbsp;                .sameSite(&quot;None&quot;)</b>
+<b class="fc">&nbsp;                .secure(true)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());</b>
+&nbsp;
+<b class="fc">&nbsp;        return ResponseUtil.ok(Map.of(&quot;message&quot;, &quot;로그인 성공&quot;, &quot;nickname&quot;, user.getNickname()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/logout&quot;)
+&nbsp;    public ResponseEntity logout(
+&nbsp;            @CookieValue(value = &quot;sessionId&quot;, required = false) String sessionId,
+&nbsp;            HttpServletResponse response) {
+<b class="fc">&nbsp;        userService.logout(sessionId);</b>
+&nbsp;
+<b class="fc">&nbsp;        ResponseCookie cookie = ResponseCookie.from(&quot;sessionId&quot;, &quot;&quot;)</b>
+<b class="fc">&nbsp;                .path(&quot;/&quot;)</b>
+<b class="fc">&nbsp;                .httpOnly(true)</b>
+<b class="fc">&nbsp;                .sameSite(&quot;None&quot;)</b>
+<b class="fc">&nbsp;                .secure(true)</b>
+<b class="fc">&nbsp;                .maxAge(0)</b>
+<b class="fc">&nbsp;                .build();</b>
+<b class="fc">&nbsp;        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());</b>
+&nbsp;
+<b class="fc">&nbsp;        return ResponseUtil.ok(&quot;ok&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping(&quot;/signup&quot;)
+&nbsp;    public ResponseEntity&lt;MessageResponseDto&gt; signUp(
+&nbsp;            @RequestParam(&quot;email&quot;) String email,
+&nbsp;            @RequestParam(&quot;password&quot;) String password,
+&nbsp;            @RequestParam(&quot;nickname&quot;) String nickname,
+&nbsp;            @RequestParam(value = &quot;image&quot;, required = false) MultipartFile imageFile) {
+&nbsp;
+<b class="fc">&nbsp;        logger.info(&quot;받은 값 : {}, {}, {}&quot;, email, nickname, imageFile);</b>
+<b class="fc">&nbsp;        userService.signUp(email, password, nickname, imageFile);</b>
+<b class="fc">&nbsp;        return ResponseUtil.created(&quot;회원가입 성공!&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/session-user&quot;)
+&nbsp;    public ResponseEntity&lt;?&gt; getSessionUser(
+&nbsp;            @CookieValue(value = &quot;sessionId&quot;, required = false) String sessionId) {
+<b class="fc">&nbsp;        User user = userService.getUserBySession(sessionId);</b>
+<b class="fc">&nbsp;        return ResponseUtil.ok(new SessionResponseDto(</b>
+&nbsp;                &quot;ok&quot;,
+<b class="fc">&nbsp;                user.getId(),</b>
+&nbsp;                sessionId,
+<b class="fc">&nbsp;                user.getNickname(),</b>
+<b class="fc">&nbsp;                user.getEmail(),</b>
+<b class="fc">&nbsp;                user.getProfileImage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PutMapping(&quot;/update/nickname&quot;)
+&nbsp;    public ResponseEntity&lt;MessageResponseDto&gt; updateProfile(
+&nbsp;            @RequestParam(&quot;nickName&quot;) String nickName,
+&nbsp;            @RequestParam(value = &quot;image&quot;, required = false) MultipartFile imageFile,
+&nbsp;            @CookieValue(value = &quot;sessionId&quot;, required = false) String sessionId) {
+&nbsp;
+<b class="fc">&nbsp;        User user = userService.getUserBySession(sessionId);</b>
+&nbsp;
+<b class="fc">&nbsp;        User updatedUser = userService.updateNickName(user.getId(), nickName, imageFile);</b>
+<b class="fc">&nbsp;        logger.info(&quot;Updated User Info: Nickname - {}, ImagePath - {}&quot;, updatedUser.getNickname(), updatedUser.getProfileImage());</b>
+<b class="fc">&nbsp;        return ResponseUtil.noContent(&quot;수정 성공!&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;
+&nbsp;    @PutMapping(&quot;/update/password&quot;)
+&nbsp;    public ResponseEntity&lt;MessageResponseDto&gt; updatePassword(
+&nbsp;            @RequestBody Map&lt;String, String&gt; requestBody,
+&nbsp;            @CookieValue(value = &quot;sessionId&quot;, required = false) String sessionId) {
+<b class="fc">&nbsp;        Long userId = userService.getUserBySession(sessionId).getId();</b>
+<b class="fc">&nbsp;        userService.updatePassword(userId, requestBody.get(&quot;password&quot;));</b>
+<b class="fc">&nbsp;        return ResponseUtil.noContent(&quot;수정 성공!&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @DeleteMapping(&quot;/resign&quot;)
+&nbsp;    public ResponseEntity&lt;MessageResponseDto&gt; resign(
+&nbsp;            @CookieValue(value = &quot;sessionId&quot;, required = false) String sessionId) {
+<b class="fc">&nbsp;        Long userId = userService.getUserBySession(sessionId).getId();</b>
+<b class="fc">&nbsp;        userService.deleteUser(userId);</b>
+<b class="fc">&nbsp;        return ResponseUtil.noContent(&quot;탈퇴 성공&quot;);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-03-30 19:29</div>
+</div>
+</body>
+</html>

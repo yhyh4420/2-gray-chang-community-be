@@ -1,0 +1,169 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > CommentController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">kakaotech.communityBE.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: CommentController (kakaotech.communityBE.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CommentController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (15/15)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package kakaotech.communityBE.controller;
+&nbsp;
+&nbsp;import kakaotech.communityBE.dto.CommentDto;
+&nbsp;import kakaotech.communityBE.dto.MessageResponseDto;
+&nbsp;import kakaotech.communityBE.service.CommentService;
+&nbsp;import kakaotech.communityBE.service.UserService;
+&nbsp;import kakaotech.communityBE.util.ResponseUtil;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import org.slf4j.Logger;
+&nbsp;import org.slf4j.LoggerFactory;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;posts/{postId}/comment&quot;)
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class CommentController {
+&nbsp;
+&nbsp;    private final UserService userService;
+&nbsp;    private final CommentService commentService;
+&nbsp;    Logger logger = LoggerFactory.getLogger(CommentController.class);
+&nbsp;
+&nbsp;    @GetMapping
+&nbsp;    public ResponseEntity&lt;List&lt;CommentDto&gt;&gt; getComments(@PathVariable(&quot;postId&quot;) Long postId) {
+<b class="fc">&nbsp;        List&lt;CommentDto&gt; commentDtoList = commentService.getAllComments(postId);</b>
+<b class="fc">&nbsp;        return ResponseUtil.ok(commentDtoList);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping
+&nbsp;    public ResponseEntity&lt;CommentDto&gt; createComment(
+&nbsp;            @RequestBody Map&lt;String, String&gt; request,
+&nbsp;            @PathVariable(&quot;postId&quot;) Long postId,
+&nbsp;            @CookieValue(value = &quot;sessionId&quot;, required = false) String sessionId) {
+<b class="fc">&nbsp;        Long userId = userService.getUserBySession(sessionId).getId();</b>
+<b class="fc">&nbsp;        String content = request.get(&quot;content&quot;);</b>
+<b class="fc">&nbsp;        logger.info(&quot;userId : {}, content : {}, postId : {}&quot;, userId, content, postId);</b>
+<b class="fc">&nbsp;        CommentDto comment = commentService.createComment(userId, postId, content);</b>
+<b class="fc">&nbsp;        return ResponseUtil.ok(comment);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PutMapping(&quot;/{commentId}&quot;)
+&nbsp;    public ResponseEntity&lt;MessageResponseDto&gt; updateComment(
+&nbsp;            @PathVariable Long commentId,
+&nbsp;            @RequestParam(&quot;content&quot;) String content,
+&nbsp;            @CookieValue(value = &quot;sessionId&quot;, required = false) String sessionId) {
+<b class="fc">&nbsp;        Long userId = userService.getUserBySession(sessionId).getId();</b>
+<b class="fc">&nbsp;        logger.info(&quot;userId : {}, content : {}, commentId : {}&quot;, userId, content, commentId);</b>
+<b class="fc">&nbsp;        CommentDto comments = commentService.updateComment(userId, commentId, content);</b>
+<b class="fc">&nbsp;        return ResponseUtil.noContent(&quot;수정 성공!&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @DeleteMapping(&quot;/{commentId}&quot;)
+&nbsp;    public ResponseEntity&lt;MessageResponseDto&gt; deleteComment(
+&nbsp;            @PathVariable Long postId,
+&nbsp;            @PathVariable Long commentId,
+&nbsp;            @CookieValue(value = &quot;sessionId&quot;, required = false) String sessionId) {
+<b class="fc">&nbsp;        Long userId = userService.getUserBySession(sessionId).getId();</b>
+<b class="fc">&nbsp;        logger.info(&quot;userId : {}, postId : {}, commentId : {}&quot;, userId, postId, commentId);</b>
+<b class="fc">&nbsp;        commentService.deleteComment(userId, commentId);</b>
+<b class="fc">&nbsp;        return ResponseUtil.noContent(&quot;삭제 완료&quot;);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-03-30 19:29</div>
+</div>
+</body>
+</html>
